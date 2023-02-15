@@ -8,7 +8,7 @@ from tqdm import tqdm
 args = argparse.ArgumentParser()
 args.add_argument("-data_path", type=str,
                   default='/Users/ilakyaprabhakar/Documents/Edin MSc/MLP/test_data/videos',
-                  help="Path to file containing videos")
+                  help="Path to directory containing videos")
 args.add_argument("-save_path", type=str,
                   default='/Users/ilakyaprabhakar/Documents/Edin MSc/MLP/test_data/',
                   help="Path to save folder containing frame representation of videos")
