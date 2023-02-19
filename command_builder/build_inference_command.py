@@ -14,7 +14,12 @@ args = argparse.ArgumentParser(
     A utility script for generating a lists of frames.
     A few points on usage:
         (1) call this from the root directory of the project
-        (2) set the data_path to 'sampling_scripts/out/random_frames/' sdfsdfsd
+        (2) set the data_path to 'sampling_scripts/out/random_frames/'
+
+    If you'd like to run inference on *all* videos, you can do the following:
+      1. redirect this output to a shell script, e.g. `$ {this script} > run_inference.sh`
+      2. chmod +x that shell script, e.g. `$ chmod +x run_inference.sh`
+      3. call the script, e.g. `$ ./run_inference.sh`
     ''')
 )
 args.add_argument(
