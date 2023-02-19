@@ -35,6 +35,10 @@ frame_lists  = [
     for directory in next(os.walk(args.data_path))[1]
 ]
 
+###################################
+# This is the template for the parameters to be passed to the command.
+# Change this if you change the model used, etc.
+###################################
 for frame_list in frame_lists:
     data = json.dumps({
         'type': 'test_git_inference_single_image', # seems wrong, but this is what the instructions say it should be...
