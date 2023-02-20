@@ -126,8 +126,8 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
         param = load_from_yaml_file(f'aux_data/models/{model_name}/parameter.yaml')
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-    if isinstance(image_path, str):
-        image_path = [image_path]
+    # if isinstance(video_files, str):
+    #     video_files = [video_files]
     # if it is more than 1 image, it is normally a video with multiple image
     # frames
     # img = [load_image_by_pil(i) for i in image_path]
