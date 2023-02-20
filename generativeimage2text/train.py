@@ -53,8 +53,8 @@ def get_data(image_file, prefix, target, tokenizer, image_transform):
     input_ids = [tokenizer.cls_token_id] + payload + [tokenizer.sep_token_id]
     need_predict = [0] + need_predict + [1]
 
-    #im = load_image_by_pil(image_file)
-    im = [load_image_by_pil(i) for i in image_file]
+    im = load_image_by_pil(image_file)
+
 
     data = {
         'caption_tokens': torch.tensor(input_ids),
