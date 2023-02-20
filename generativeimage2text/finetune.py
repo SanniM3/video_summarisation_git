@@ -53,6 +53,8 @@ def get_data(image_file, prefix, target, tokenizer, param):
     need_predict = [0] + need_predict + [1]
 
     #im = load_image_by_pil(image_file)
+    for i in image_file:
+        print(i)
     img = [load_image_by_pil(i) for i in image_file]
 
     transforms = get_image_transform(param)
@@ -113,7 +115,9 @@ class MinMaxResizeForTest(object):
         return image
 
 
-def test_git_inference_single_image(image_path, model_name, captions, prefix):
+def test_git_inference_single_image(image_path, model_name, caption):
+    # if prefixs is None:
+    #     prefixs = [''] * len(captions)
     param = {}
     if File.isfile(f'aux_data/models/{model_name}/parameter.yaml'):
         param = load_from_yaml_file(f'aux_data/models/{model_name}/parameter.yaml')
@@ -123,23 +127,59 @@ def test_git_inference_single_image(image_path, model_name, captions, prefix):
         image_path = [image_path]
     # if it is more than 1 image, it is normally a video with multiple image
     # frames
-    # img = [load_image_by_pil(i) for i in image_path]
+    img = [load_image_by_pil(i) for i in image_path]
 
-    # transforms = get_image_transform(param)
-    # img = [transforms(i) for i in img]
-    # img = [i.unsqueeze(0).cuda() for i in img]
+    transforms = get_image_transform(param)
+    img = [transforms(i) for i in img]
+    img = [i.unsqueeze(0).cuda() for i in img]
+
     # model
     all_data=[]
     model = get_git_model(tokenizer, param)
-    pretrained = f'output/{model_name}/snapshot/model.pt'
+    pretrained = 'model.pt'
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
-    for image_file, prefix, target in zip(image_path, prefix, captions):
-        data = get_data(image_file, prefix, target,
-                        tokenizer, param)
-        all_data.append(data)
-    data = collate_fn(all_data)
-    data = recursive_to_device(data, 'cuda')
+    # for image_file, prefix, target in zip(image_path, prefixs, captions):
+    #     data = get_data(image_file, prefix, target,
+    #                     tokenizer, param)
+    #     all_data.append(data)
+    # data = collate_fn(all_data)
+    # data = recursive_to_device(data, 'cuda')
+
+    # caption
+    max_text_len = 40
+    target_encoding = tokenizer(
+        caption, padding='do_not_pad',
+        add_special_tokens=False,
+        truncation=True, max_length=max_text_len)
+    need_predict = [1] * len(target_encoding['input_ids'])
+    payload = target_encoding['input_ids']
+    if len(payload) > max_text_len - 2:
+        payload = payload[-(max_text_len - 2):]
+        need_predict = need_predict[-(max_text_len - 2):]
+    input_ids = [tokenizer.cls_token_id] + payload
+    need_predict = [0] + need_predict + [1]
+
+    data = {
+        'caption_tokens': torch.tensor(input_ids).unsqueeze(0).cuda(),
+        #'caption_lengths': len(input_ids),
+        'need_predict': torch.tensor(need_predict),
+        'image': img,
+        # 'rect' field can be fed in 'caption', which tells the bounding box
+        # region of the image that is described by the caption. In this case,
+        # we can optionally crop the region.
+        'caption': {},
+        # this iteration can be used for crop-size selection so that all GPUs
+        # can process the image with the same input size
+        'iteration': 0,
+    }
+
+    # with torch.no_grad():
+    #     result = model({
+    #         'image': img,
+    #         'prefix': torch.tensor(input_ids).unsqueeze(0).cuda(),
+    #     })
+
     model.train()
     model.cuda()
     loss_dict = model(data)
@@ -360,4 +400,6 @@ if __name__ == '__main__':
     function_name = kwargs['type']
     del kwargs['type']
     locals()[function_name](**kwargs)
+
+
 
