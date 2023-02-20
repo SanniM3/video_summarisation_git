@@ -114,7 +114,7 @@ def test_git_inference_single_image(image_path, model_name, caption):
     data = {
         'caption_tokens': torch.tensor(input_ids).unsqueeze(0).cuda(),
         #'caption_lengths': len(input_ids),
-        'need_predict': torch.tensor(need_predict),
+        'need_predict': torch.tensor(need_predict).unsqueeze(0).cuda(),
         'image': img,
         # 'rect' field can be fed in 'caption', which tells the bounding box
         # region of the image that is described by the caption. In this case,
