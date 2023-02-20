@@ -119,8 +119,8 @@ class MinMaxResizeForTest(object):
 
 
 def forward_backward(video_files, model_name, captions, prefixes=None):
-    if prefixs is None:
-        prefixs = [''] * len(captions)
+    if prefixes is None:
+        prefixes = [''] * len(captions)
     param = {}
     if File.isfile(f'aux_data/models/{model_name}/parameter.yaml'):
         param = load_from_yaml_file(f'aux_data/models/{model_name}/parameter.yaml')
