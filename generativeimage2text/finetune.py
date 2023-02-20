@@ -60,7 +60,7 @@ def get_data(video_file, prefix, target, tokenizer, param):
 
     transforms = get_image_transform(param)
     img = [transforms(i) for i in img]
-    img = [i.unsqueeze(0).cuda() for i in img]
+    # img = [i.unsqueeze(0).cuda() for i in img]
 
 
     data = {
@@ -133,45 +133,14 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
     
-    max_text_len = 40
+    # max_text_len = 40
     all_data = []
     for video_file, prefix, target in zip(video_files, prefixes, captions):
-        img = [load_image_by_pil(i) for i in video_file]
-
-        transforms = get_image_transform(param)
-        img = [transforms(i) for i in img]
-        img = [i.unsqueeze(0).cuda() for i in img]
-
-        target_encoding = tokenizer(target, 
-                                padding='do_not_pad',
-                                add_special_tokens=False,
-                                truncation=True, 
-                                max_length=max_text_len)
-        need_predict = [1] * len(target_encoding['input_ids'])
-        payload = target_encoding['input_ids']
-        if len(payload) > max_text_len:
-            payload = payload[-(max_text_len - 2):]
-            need_predict = need_predict[-(max_text_len - 2):]
-        input_ids = [tokenizer.cls_token_id] + payload
-        need_predict = need_predict + [1]
-
-        data = {
-            'caption_tokens': torch.tensor(input_ids).unsqueeze(0).cuda(),
-            #'caption_lengths': len(input_ids),
-            'need_predict': torch.tensor(need_predict).unsqueeze(0).cuda(),
-            'image': img,
-            # 'rect' field can be fed in 'caption', which tells the bounding box
-            # region of the image that is described by the caption. In this case,
-            # we can optionally crop the region.
-            'caption': {},
-            # this iteration can be used for crop-size selection so that all GPUs
-            # can process the image with the same input size
-            'iteration': 0,
-        }
+        data = get_data(video_file, prefix, target, tokenizer, param)
         all_data.append(data)
     
     data = collate_fn(all_data)
-    # data = recursive_to_device(data, 'cuda')
+    data = recursive_to_device(data, 'cuda')
 
     
     model.train()
