@@ -126,56 +126,13 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
         param = load_from_yaml_file(f'aux_data/models/{model_name}/parameter.yaml')
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-    # if isinstance(video_files, str):
-    #     video_files = [video_files]
-    # if it is more than 1 image, it is normally a video with multiple image
-    # frames
-    # img = [load_image_by_pil(i) for i in image_path]
-
-    # transforms = get_image_transform(param)
-    # img = [transforms(i) for i in img]
-    # img = [i.unsqueeze(0).cuda() for i in img]
-
+   
     # model
     model = get_git_model(tokenizer, param)
     pretrained = 'model.pt'
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
     
-    # caption
-    # max_text_len = 40
-    # target_encoding = tokenizer(caption, 
-    #                             padding='do_not_pad',
-    #                             add_special_tokens=False,
-    #                             truncation=True, 
-    #                             max_length=max_text_len)
-    # need_predict = [1] * len(target_encoding['input_ids'])
-    # payload = target_encoding['input_ids']
-    # if len(payload) > max_text_len:
-    #     payload = payload[-(max_text_len - 2):]
-    #     need_predict = need_predict[-(max_text_len - 2):]
-    # input_ids = [tokenizer.cls_token_id] + payload
-    # need_predict = need_predict + [1]
-
-    # data = {
-    #     'caption_tokens': torch.tensor(input_ids).unsqueeze(0).cuda(),
-    #     #'caption_lengths': len(input_ids),
-    #     'need_predict': torch.tensor(need_predict).unsqueeze(0).cuda(),
-    #     'image': img,
-    #     # 'rect' field can be fed in 'caption', which tells the bounding box
-    #     # region of the image that is described by the caption. In this case,
-    #     # we can optionally crop the region.
-    #     'caption': {},
-    #     # this iteration can be used for crop-size selection so that all GPUs
-    #     # can process the image with the same input size
-    #     'iteration': 0,
-    # }
-
-    # with torch.no_grad():
-    #     result = model({
-    #         'image': img,
-    #         'prefix': torch.tensor(input_ids).unsqueeze(0).cuda(),
-    #     })
     max_text_len = 40
     all_data = []
     for video_file, prefix, target in zip(video_files, prefixes, captions):
@@ -212,8 +169,9 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
             'iteration': 0,
         }
         all_data.append(data)
+    
     data = collate_fn(all_data)
-    data = recursive_to_device(data, 'cuda')
+    # data = recursive_to_device(data, 'cuda')
 
     
     model.train()
