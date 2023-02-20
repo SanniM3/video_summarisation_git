@@ -81,7 +81,8 @@ def test_git_inference_single_image(image_path, model_name, prefix):
 
     # model
     model = get_git_model(tokenizer, param)
-    pretrained = f'output/{model_name}/snapshot/model.pt'
+    # pretrained = f'output/{model_name}/snapshot/model.pt'
+    pretrained = 'model.pt'
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
     model.cuda()
