@@ -103,18 +103,18 @@ def test_git_inference_single_image(image_path, model_name, caption):
                                 add_special_tokens=False,
                                 truncation=True, 
                                 max_length=max_text_len)
-    # need_predict = [1] * len(target_encoding['input_ids'])
+    need_predict = [1] * len(target_encoding['input_ids'])
     payload = target_encoding['input_ids']
-    if len(payload) > max_text_len - 2:
+    if len(payload) > max_text_len:
         payload = payload[-(max_text_len - 2):]
-        # need_predict = need_predict[-(max_text_len - 2):]
+        need_predict = need_predict[-(max_text_len - 2):]
     input_ids = [tokenizer.cls_token_id] + payload
-    # need_predict = [0] + need_predict + [1]
+    need_predict = need_predict + [1]
 
     data = {
         'caption_tokens': torch.tensor(input_ids).unsqueeze(0).cuda(),
         #'caption_lengths': len(input_ids),
-        # 'need_predict': torch.tensor(need_predict),
+        'need_predict': torch.tensor(need_predict),
         'image': img,
         # 'rect' field can be fed in 'caption', which tells the bounding box
         # region of the image that is described by the caption. In this case,
