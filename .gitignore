@@ -353,3 +353,4 @@ build/
 *.egg-info/
 output/
 
+.venv/
