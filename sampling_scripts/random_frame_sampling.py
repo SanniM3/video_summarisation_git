@@ -6,18 +6,16 @@ import random
 from tqdm import tqdm
 
 args = argparse.ArgumentParser()
-args.add_argument("-data_path", type=str,
-                  default='/Users/ilakyaprabhakar/Documents/Edin MSc/MLP/test_data/videos',
-                  help="Path to file containing videos")
-args.add_argument("-save_path", type=str,
-                  default='/Users/ilakyaprabhakar/Documents/Edin MSc/MLP/test_data/',
-                  help="Path to save folder containing frame representation of videos")
+args.add_argument("-data_dir", type=str,
+                  default='/Users/ilakyaprabhakar/Documents/Edin MSc/MLP/video_summarisation_git/data_subset/videos',
+                  help="Path to directory containing videos")
 args = args.parse_args()
 
-frames_file = os.path.join(args.save_path, 'random_frames')
+save_path = os.path.split(args.data_dir)[0]
+frames_file = os.path.join(save_path, 'random_frames')
 pathlib.Path(frames_file).mkdir(parents=True, exist_ok=True)
 
-for video in tqdm(os.listdir(args.data_path)):
+for video in tqdm(os.listdir(args.data_dir)):
     video_name, extension = os.path.splitext(video)
     # make folder for each video
     
@@ -27,7 +25,7 @@ for video in tqdm(os.listdir(args.data_path)):
     # filters out DS Store files when running locally
     if extension == ".mp4":
         # load vid
-        vidcap = cv2.VideoCapture(os.path.join(args.data_path, video))
+        vidcap = cv2.VideoCapture(os.path.join(args.data_dir, video))
         # find tot number of frames
         total_frames = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
         # sample 6 random frames
@@ -39,7 +37,6 @@ for video in tqdm(os.listdir(args.data_path)):
             # set frame position
             vidcap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
             success, image = vidcap.read()
-            
             if success:
                 cv2.imwrite(os.path.join(video_file, video_name+'_frame{}.jpg'.format(n)), image)
                 n+=1
