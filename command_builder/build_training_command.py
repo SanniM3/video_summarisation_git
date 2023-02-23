@@ -53,14 +53,16 @@ frame_table = pd.DataFrame(frame_lists)
 data = pd.merge(left=frame_table, right=sentences, how="inner", on="video_id")
 #data['type'] = 'forward_backward_example' # an arg the actual command line will use
 
-base_command = "python -m generativeimage2text.train -p"
+base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
-    'type': 'forward_backward_example',
-    'image_files': list(data['image_files']),
+    'type': 'forward_backward',
+    'video_files': list(data['image_files']),
+#    'model_name': 'GIT_BASE_MSRVTT_QA',
+    'model_name': 'GIT_BASE_VATEX',
     'captions': list(data['caption']),
 })
 
-print(f'{base_command} "{params}"')
+print(f"{base_command} '{params}'")
 
 
 #### dustbin:
