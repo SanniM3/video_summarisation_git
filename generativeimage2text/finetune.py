@@ -151,17 +151,67 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     logging.info(loss)
     # img = [i.unsqueeze(0).cuda() for i in img]
 
-def data_loader(videos_train, captions_train, model_name, batch_size, prefixes=None):
+def train(videos_train, captions_train, model_name, batch_size, epochs, prefixes=None):
     #divide training data into batches
-    train_permutations = np.random.permutation(range(len(videos_train)))
+    train_permutations = torch.randperm(range(len(videos_train)))
     shuffled_videos_train = [videos_train[p] for p in train_permutations]
     shuffled_captions_train = [captions_train[p] for p in train_permutations]
 
-    def batch_list(full_list, batch_size):
-        for i in range(0, len(full_list), batch_size):
-            yield full_list[i:i + batch_size]
+    
+    def get_batches(full_list, batch_size):
+        batches = []
+        for i in range(int(len(full_list)/batch_size)):
+            batches.append(full_list[i*batch_size : (i+1)*batch_size])
+        return batches
 
-    forward_backward(batch_list(shuffled_videos_train, batch_size), model_name, shuffled_captions_train, prefixes=None)
+    if prefixes is None:
+        prefixes = [''] * len(captions)
+
+    param = {}
+
+    if File.isfile(f'aux_data/models/{model_name}/parameter.yaml'):
+        param = load_from_yaml_file(f'aux_data/models/{model_name}/parameter.yaml')
+
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+
+    # model
+    model = get_git_model(tokenizer, param)
+    pretrained = 'model.pt'
+    checkpoint = torch_load(pretrained)['model']
+    load_state_dict(model, checkpoint)
+    losses = []
+    
+    for epoch in epochs:
+
+        video_file_batches = get_batches(shuffled_videos_train, batch_size)
+        caption_batches = get_batches(shuffled_captions_train, batch_size)
+        
+                    
+        #minibatch training on training_set
+        for video_files, captions in zip(video_file_batches, caption_batches):
+
+            # max_text_len = 40
+            batch_data = []
+            for video_file, prefix, target in zip(video_files, prefixes, captions):
+                data = get_data(video_file, prefix, target, tokenizer, param)
+                batch_data.append(data)
+            
+            data = collate_fn(batch_data)
+            data = recursive_to_device(data, 'cuda')
+
+            
+            model.train()
+            model.cuda()
+            loss_dict = model(data)
+            loss = sum(loss_dict.values())
+            loss.backward()
+            logging.info(loss)
+            losses.append(loss)
+        
+    logging.info(losses)
+    #save model parameters
+    torch.save(model, 'msrvtt_model.pt')
+             
 
    
 def get_image_transform(param):
