@@ -1,3 +1,40 @@
+# Additional Setup for UoE Team \& convenience scripts
+The following are additional setup steps that are needed to get this working.
+You should still follow all the directions in the official "Introduction" below this.
+
+## Installation
+1. Install additional requirements
+```
+pip install -r requirements_2.txt
+```
+2. Download pretrained vatex model
+```
+./get_pretrained_vatex.sh
+```
+
+## Get things going
+1. sample videos \& create fine tuning command
+```
+./setup_data.sh # assumes .venv is your virtual environment. may not work otherwise
+chmod +x train.sh
+```
+2. run the fine tuning command
+```
+./train.sh
+```
+
+## FAQ
+
+- errors about "libcublasLt.so.11 not defined in file libcublasLt.so.11" \
+  See this [stackoverflow post](https://stackoverflow.com/questions/74394695/how-does-one-fix-when-torch-cant-find-cuda-error-version-libcublaslt-so-11-no). It got the error to go away, but I'm still having cuda issues so I may need to tinker with this more
+
+- errors about cv2, pandas, numpy, etc.\
+  make sure you've installed the second requirements file as described above
+
+- errors about model.py when running the fine tuning script\
+  make sure you've downloaded vatex as described above in the root dir of the project
+
+----
 # Introduction
 This repo presents some example codes to reproduce some results in
 [GIT: A Generative Image-to-text Transformer for Vision and Language](https://arxiv.org/abs/2205.14100).
