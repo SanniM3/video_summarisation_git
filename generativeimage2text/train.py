@@ -55,6 +55,7 @@ def get_data(image_file, prefix, target, tokenizer, image_transform):
 
     im = load_image_by_pil(image_file)
 
+
     data = {
         'caption_tokens': torch.tensor(input_ids),
         #'caption_lengths': len(input_ids),
