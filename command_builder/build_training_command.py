@@ -1,6 +1,5 @@
 import pandas as pd
 import json
-
 import os
 import argparse
 import json
@@ -8,38 +7,76 @@ import glob
 import textwrap
 from pprint import pprint
 import random
+import pathlib
+
+DATA_DIR = "data_subset"
+RAND_SEED = 202302241120
+#######################################
+## Arguments
+#######################################
 
 args = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
-    description=textwrap.dedent('''\
-     ''')
+    description=textwrap.dedent("""
+        Create a call to the fine tuning command
+        for a set of video frames and captions.
+    """)
 )
 args.add_argument(
-    "data_path", type=str,
-    default='.',
-    help="Path to parent directory that has all folders that contain frames"
+    "-d", "--data_path", type=pathlib.Path,
+    default=os.path.join(os.getcwd(),DATA_DIR,'random_frames'),
+    help="Path to parent directory that has all folders that contain frames, e.g. data_subset/random_frames"
 )
 
 args.add_argument(
-    "annotations_file", type=str,
-    default='.',
-    help="path to file of annotations, e.g. '../train_val_videodatainfo.json'"
+    "-c", "--captions_file", type=pathlib.Path,
+    default=os.path.join(os.getcwd(),DATA_DIR,'train_val_videodatainfo.json'),
+    help="path to file of captions, e.g. 'data_subset/train_val_videodatainfo.json'"
+)
+
+args.add_argument(
+    "-a", "--all-captions",
+    action="store_true",
+    help="""create fine tune command for ALL captions.
+            If this flag is not set, a single random caption
+            will be selected for each video as suggested by
+            "https://huggingface.co/docs/transformers/main/en/tasks/image_captioning".
+            """
+)
+
+args.add_argument(
+    "-m", "--model",
+    default="GIT_BASE_VATEX",
+    help="""The name of the model to fine tune.
+            Default is GIT_BASE_VATEX. NOTE: Other values may not work
+            since pretraining script assumes vatex.
+            We may want to consider GIT_BASE_MSRVTT_QA
+            """
 )
 
 args = args.parse_args()
 
-# get annotations
-#annotations_path = "train_val_videodatainfo.json"
-annotations_path = args.annotations_file
+#######################################
+##  get annotations
+########################################
 
-with open(annotations_path, 'r') as file:
+with open(args.captions_file, 'r') as file:
     json_data = json.load(file)
-    sentences = pd.DataFrame(json_data['sentences'])
 
-# sentences = sentences.groupby('video_id').agg({'caption':list})
+sentences = pd.DataFrame(json_data['sentences'])
+sentences = sentences.drop("sen_id", axis=1)
 
-# get frames
-#image_dir = "../sampling_scripts/out/random_frames/"
+# select random captions based on command line args
+if not args.all_captions:
+    random.seed(RAND_SEED)
+    sentences = sentences.groupby('video_id').agg({'caption':list})
+    sentences['caption'] = sentences.apply({'caption':random.choice})
+
+sentences = sentences.sort_values("video_id")
+
+#######################################
+##  get frames
+########################################
 image_dir = args.data_path
 
 frame_lists = [
@@ -49,27 +86,18 @@ frame_lists = [
 
 frame_table = pd.DataFrame(frame_lists)
 
-# merge
+########################################
+##  Merge (inner join captions with frames)
+########################################
+
 data = pd.merge(left=frame_table, right=sentences, how="inner", on="video_id")
-#data['type'] = 'forward_backward_example' # an arg the actual command line will use
 
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
     'type': 'forward_backward',
     'video_files': list(data['image_files']),
-#    'model_name': 'GIT_BASE_MSRVTT_QA',
-    'model_name': 'GIT_BASE_VATEX',
+    'model_name': args.model,
     'captions': list(data['caption']),
 })
 
 print(f"{base_command} '{params}'")
-
-
-#### dustbin:
-# TODO it's not clear how to handle multiple sentences per
-# frame/video. The hugging face doc reccomends just piceking one sentence.
-# the following implements that, but it might not be what we want to do.
-
-# sentences.apply({'caption':random.choice})
-
-# records = json.loads(data[['type', 'image_files', 'caption']].to_json(orient='records'))
