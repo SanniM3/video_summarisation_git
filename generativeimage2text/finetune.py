@@ -151,7 +151,19 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     logging.info(loss)
     # img = [i.unsqueeze(0).cuda() for i in img]
 
-    
+def data_loader(videos_train, captions_train, model_name, batch_size, prefixes=None):
+    #divide training data into batches
+    train_permutations = np.random.permutation(range(len(videos_train)))
+    shuffled_videos_train = [videos_train[p] for p in train_permutations]
+    shuffled_captions_train = [captions_train[p] for p in train_permutations]
+
+    def batch_list(full_list, batch_size):
+        for i in range(0, len(full_list), batch_size):
+            yield full_list[i:i + batch_size]
+
+    forward_backward(batch_list(shuffled_videos_train, batch_size), model_name, shuffled_captions_train, prefixes=None)
+
+   
 def get_image_transform(param):
     crop_size = param.get('test_crop_size', 224)
     if 'test_respect_ratio_max' in param:
