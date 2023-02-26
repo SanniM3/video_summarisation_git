@@ -151,11 +151,11 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     logging.info(loss)
     # img = [i.unsqueeze(0).cuda() for i in img]
 
-def train(videos_train, captions_train, model_name, batch_size, epochs, prefixes=None):
+def train(video_files, captions, model_name, batch_size, epochs, prefixes=None):
     #divide training data into batches
-    train_permutations = torch.randperm(range(len(videos_train)))
-    shuffled_videos_train = [videos_train[p] for p in train_permutations]
-    shuffled_captions_train = [captions_train[p] for p in train_permutations]
+    train_permutations = torch.randperm(range(len(video_files)))
+    shuffled_video_files = [video_files[p] for p in train_permutations]
+    shuffled_captions = [captions[p] for p in train_permutations]
 
     
     def get_batches(full_list, batch_size):
@@ -183,8 +183,8 @@ def train(videos_train, captions_train, model_name, batch_size, epochs, prefixes
     
     for epoch in epochs:
 
-        video_file_batches = get_batches(shuffled_videos_train, batch_size)
-        caption_batches = get_batches(shuffled_captions_train, batch_size)
+        video_file_batches = get_batches(shuffled_video_files, batch_size)
+        caption_batches = get_batches(shuffled_captions, batch_size)
         
                     
         #minibatch training on training_set

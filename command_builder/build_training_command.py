@@ -54,6 +54,20 @@ args.add_argument(
             """
 )
 
+args.add_argument(
+    "-b", "--batch_size",
+    default=128, type=int,
+    help="""batch size for training
+            """
+)
+
+args.add_argument(
+    "-e", "--epochs",
+    default=2, type=int,
+    help="""number of training epochs
+            """
+)
+
 args = args.parse_args()
 
 #######################################
@@ -94,10 +108,15 @@ data = pd.merge(left=frame_table, right=sentences, how="inner", on="video_id")
 
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
-    'type': 'forward_backward',
+    'type': 'train',
     'video_files': list(data['image_files']),
-    'model_name': args.model,
     'captions': list(data['caption']),
+    'model_name': args.model,
+    'batch_size': args.batch_size,
+    'epochs': args.epochs,
 })
 
-print(f"{base_command} '{params}'")
+command = f"{base_command} '{params}'"
+#write command to .sh file
+with open('runner.sh', 'w') as f:
+    f.write(command)
