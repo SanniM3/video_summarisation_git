@@ -152,8 +152,8 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     logging.info(loss)
     # img = [i.unsqueeze(0).cuda() for i in img]
 
-def train(video_caption, model_name, batch_size, epochs, prefixes=None):
-    vid_caption_df = pd.read_csv(video_caption)
+def train(model_name, batch_size, epochs, prefixes=None):
+    vid_caption_df = pd.read_csv('processed_data.csv')
     video_files = list(vid_caption_df['image_files'])
     captions = list(vid_caption_df['caption'])
     #divide training data into batches
