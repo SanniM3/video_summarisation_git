@@ -138,7 +138,7 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     # max_text_len = 40
     all_data = []
     for video_file, prefix, target in zip(video_files, prefixes, captions):
-        print(video_file)
+        #print(video_file)
         data = get_data(video_file, prefix, target, tokenizer, param)
         all_data.append(data)
     
