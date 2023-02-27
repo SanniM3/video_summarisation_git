@@ -150,6 +150,7 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     loss = sum(loss_dict.values())
     loss.backward()
     logging.info(loss)
+    return loss
     # img = [i.unsqueeze(0).cuda() for i in img]
 
 def train(model_name, batch_size, epochs, prefixes=None):
@@ -191,27 +192,14 @@ def train(model_name, batch_size, epochs, prefixes=None):
         video_file_batches = get_batches(shuffled_video_files, batch_size)
         caption_batches = get_batches(shuffled_captions, batch_size)
         
-                    
+        batch_losses = []           
         #minibatch training on training_set
-        for video_files, captions in zip(video_file_batches, caption_batches):
-
-            # max_text_len = 40
-            batch_data = []
-            for video_file, prefix, target in zip(video_files, prefixes, captions):
-                data = get_data(video_file, prefix, target, tokenizer, param)
-                batch_data.append(data)
-            
-            data = collate_fn(batch_data)
-            data = recursive_to_device(data, 'cuda')
-
-            
-            model.train()
-            model.cuda()
-            loss_dict = model(data)
-            loss = sum(loss_dict.values())
-            loss.backward()
-            logging.info(loss)
-            losses.append(loss)
+        for video_files_batch, captions_batch in zip(video_file_batches, caption_batches):
+            print(len(video_files_batch))
+            batch_loss = forward_backward(video_files_batch, model_name, captions_batch)
+            batch_losses.append(batch_loss)
+        
+        losses.append(batch_losses)
         
     logging.info(losses)
     #save model parameters
