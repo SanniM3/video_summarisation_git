@@ -1,5 +1,6 @@
 from .common import Config
 import json
+import pandas
 import os.path as op
 from .common import qd_tqdm as tqdm
 from .common import json_dump
@@ -151,7 +152,10 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     logging.info(loss)
     # img = [i.unsqueeze(0).cuda() for i in img]
 
-def train(video_files, captions, model_name, batch_size, epochs, prefixes=None):
+def train(video_caption, model_name, batch_size, epochs, prefixes=None):
+    vid_caption_df = pd.read_csv(video_caption)
+    video_files = list(vid_caption_df['images'])
+    captions = list(vid_caption_df['captions'])
     #divide training data into batches
     train_permutations = torch.randperm(range(len(video_files)))
     shuffled_video_files = [video_files[p] for p in train_permutations]
