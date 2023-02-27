@@ -118,10 +118,13 @@ params = json.dumps({
     'video_caption': args.dataframe_file,
     'model_name': args.model,
     'batch_size': args.batch_size,
-    'epochs': args.epochs,
+    'epochs': args.epochs
 })
 
 command = f"{base_command} '{params}'"
 #write command to .sh file
 with open('runner.sh', 'w') as f:
     f.write(command)
+
+
+python ./video_summarisation_git/command_builder/build_training_command.py -d ./video_summarisation_git/random_train_frames/ -c ./train_val_videodatainfo.json -m GIT_BASE_VATEX -e 2 -b 128 -o processed_data.csv
