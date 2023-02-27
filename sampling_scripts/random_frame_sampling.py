@@ -29,7 +29,7 @@ for video in tqdm(os.listdir(args.data_dir)):
         # find tot number of frames
         total_frames = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
         # sample 6 random frames
-        random_frame_numbers = random.sample(range(0, total_frames), 6)
+        random_frame_numbers = sorted(random.sample(range(0, total_frames), 6))
         
         n = 0
         for frame_number in random_frame_numbers:
