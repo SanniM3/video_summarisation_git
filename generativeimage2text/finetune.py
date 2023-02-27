@@ -156,9 +156,9 @@ def train(model_name, batch_size, epochs, prefixes=None):
     vid_caption_df = pd.read_csv('processed_data.csv')
     video_files = list(vid_caption_df['image_files'])
     captions = list(vid_caption_df['caption'])
-    print(len(video_files))
+    # print(len(video_files))
     #divide training data into batches
-    train_permutations = torch.randperm(range(len(video_files)))
+    train_permutations = torch.randperm(len(video_files))
     shuffled_video_files = [video_files[p] for p in train_permutations]
     shuffled_captions = [captions[p] for p in train_permutations]
 
