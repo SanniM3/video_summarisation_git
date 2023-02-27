@@ -159,12 +159,12 @@ def train(model_name, batch_size, epochs, prefixes=None):
     vid_caption_df = pd.read_csv('processed_data.csv')
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
-    print(video_files[0:4])
+    # print(video_files[0:4])
     captions = list(vid_caption_df['caption'])
     # print(len(video_files))
     #divide training data into batches
     train_permutations = torch.randperm(len(video_files))
-    print(train_permutations[:10])
+    # print(train_permutations[:10])
     shuffled_video_files = [video_files[p] for p in train_permutations]
     shuffled_captions = [captions[p] for p in train_permutations]
 
@@ -200,7 +200,7 @@ def train(model_name, batch_size, epochs, prefixes=None):
         batch_losses = []           
         #minibatch training on training_set
         for video_files_batch, captions_batch in zip(video_file_batches, caption_batches):
-            print(len(video_files_batch))
+            # print(len(video_files_batch))
             batch_loss = forward_backward(video_files_batch, model_name, captions_batch)
             batch_losses.append(batch_loss)
         
