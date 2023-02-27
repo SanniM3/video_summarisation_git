@@ -1,6 +1,7 @@
 from .common import Config
 import json
 import pandas as pd
+from ast import literal_eval
 import os.path as op
 from .common import qd_tqdm as tqdm
 from .common import json_dump
@@ -157,6 +158,7 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
 def train(model_name, batch_size, epochs, prefixes=None):
     vid_caption_df = pd.read_csv('processed_data.csv')
     video_files = list(vid_caption_df['image_files'])
+    video_files = [literal_eval(i) for i in video_files]
     print(video_files[0:4])
     captions = list(vid_caption_df['caption'])
     # print(len(video_files))
