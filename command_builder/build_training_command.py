@@ -36,7 +36,7 @@ args.add_argument(
 
 args.add_argument(
     "-o", "--dataframe_file", type=pathlib.Path,
-    default='processed_data.csv',
+    default=os.path.join(os.getcwd(),DATA_DIR,'processed_data.csv'),
     help="path to dataframe containig video-to-caption mapping"
 )
 
