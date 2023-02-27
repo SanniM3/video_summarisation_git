@@ -127,4 +127,4 @@ with open('runner.sh', 'w') as f:
     f.write(command)
 
 
-python ./video_summarisation_git/command_builder/build_training_command.py -d ./video_summarisation_git/random_train_frames/ -c ./train_val_videodatainfo.json -m GIT_BASE_VATEX -e 2 -b 128 -o processed_data.csv
+#python ./video_summarisation_git/command_builder/build_training_command.py -d ./video_summarisation_git/random_train_frames/ -c ./train_val_videodatainfo.json -m GIT_BASE_VATEX -e 2 -b 128 -o processed_data.csv
