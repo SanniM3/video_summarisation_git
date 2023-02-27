@@ -1,6 +1,6 @@
 from .common import Config
 import json
-import pandas
+import pandas as pd
 import os.path as op
 from .common import qd_tqdm as tqdm
 from .common import json_dump
