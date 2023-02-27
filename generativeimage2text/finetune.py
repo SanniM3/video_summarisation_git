@@ -186,7 +186,7 @@ def train(model_name, batch_size, epochs, prefixes=None):
     load_state_dict(model, checkpoint)
     losses = []
     
-    for epoch in epochs:
+    for epoch in range(epochs):
 
         video_file_batches = get_batches(shuffled_video_files, batch_size)
         caption_batches = get_batches(shuffled_captions, batch_size)
