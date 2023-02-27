@@ -111,7 +111,7 @@ frame_table = pd.DataFrame(frame_lists)
 ########################################
 
 data = pd.merge(left=frame_table, right=sentences, how="inner", on="video_id")
-pd.to_csv(args.dataframe_file)
+data.to_csv(args.dataframe_file)
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
     'type': 'train',
