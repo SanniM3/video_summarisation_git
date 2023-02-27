@@ -35,6 +35,12 @@ args.add_argument(
 )
 
 args.add_argument(
+    "-o", "--dataframe_file", type=pathlib.Path,
+    default='processed_data.csv',
+    help="path to dataframe containig video-to-caption mapping"
+)
+
+args.add_argument(
     "-a", "--all-captions",
     action="store_true",
     help="""create fine tune command for ALL captions.
@@ -105,12 +111,10 @@ frame_table = pd.DataFrame(frame_lists)
 ########################################
 
 data = pd.merge(left=frame_table, right=sentences, how="inner", on="video_id")
-
+pd.to_csv(args.dataframe_file)
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
     'type': 'train',
-    'video_files': list(data['image_files']),
-    'captions': list(data['caption']),
     'model_name': args.model,
     'batch_size': args.batch_size,
     'epochs': args.epochs,
