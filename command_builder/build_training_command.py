@@ -115,6 +115,7 @@ pd.to_csv(args.dataframe_file)
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
     'type': 'train',
+    'video_caption': args.dataframe_file
     'model_name': args.model,
     'batch_size': args.batch_size,
     'epochs': args.epochs,
