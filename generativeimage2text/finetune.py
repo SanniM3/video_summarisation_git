@@ -157,10 +157,12 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
 def train(model_name, batch_size, epochs, prefixes=None):
     vid_caption_df = pd.read_csv('processed_data.csv')
     video_files = list(vid_caption_df['image_files'])
+    print(video_files[0:4])
     captions = list(vid_caption_df['caption'])
     # print(len(video_files))
     #divide training data into batches
     train_permutations = torch.randperm(len(video_files))
+    print(train_permutations[:10])
     shuffled_video_files = [video_files[p] for p in train_permutations]
     shuffled_captions = [captions[p] for p in train_permutations]
 
