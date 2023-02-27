@@ -100,7 +100,7 @@ sentences = sentences.sort_values("video_id")
 image_dir = args.data_path
 
 frame_lists = [
-    {'video_id': directory, 'image_files': [file for file in glob.glob(os.path.join(image_dir, directory, "*.jpg"))]}
+    {'video_id': directory, 'image_files': [file for file in sorted(glob.glob(os.path.join(image_dir, directory, "*.jpg")))]}
     for directory in next(os.walk(image_dir))[1]
 ]
 
