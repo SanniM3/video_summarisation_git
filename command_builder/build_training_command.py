@@ -146,14 +146,13 @@ data.to_csv('processed_data.csv')
 logging.debug(f"\nraw data:\n{data}")
 logging.debug(f"\ndata stats:\n{data.describe()}")
 logging.debug(f"\ncategory counts:\n{pd.value_counts(data['category'], sort=False)}")
-logging.debug(f"\nlength histogram:\n{pd.value_counts(data['length'], bins=30, sort=False)}")
-length_by_cat = pd.pivot_table(
+logging.debug(f"\nlength histogram:\n{pd.value_counts(data['length'], bins=20, sort=False)}")
+length_by_category = pd.pivot_table(
     data=data,
     index="category",
-    columns="length",
-    aggfunc={"category":len},
+    aggfunc={"length":{len,"mean","std"}},
 )
-logging.debug(length_by_cat)
+logging.debug(length_by_category)
 
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
