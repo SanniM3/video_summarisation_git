@@ -8,6 +8,7 @@ import textwrap
 from pprint import pprint
 import random
 import pathlib
+import logging
 
 DATA_DIR = "data_subset"
 RAND_SEED = 202302241120
@@ -74,7 +75,23 @@ args.add_argument(
             """
 )
 
+args.add_argument(
+    "-v", "--verbose",
+    action="store_true",
+    help="print debugging output"
+)
+
+args.add_argument(
+    "-f", "--filter",
+    type=int,
+    help="only output a certain category of video. Category should be an integer"
+)
+
 args = args.parse_args()
+
+# show/hide debugging
+if args.verbose:
+    logging.getLogger().setLevel(logging.DEBUG)
 
 #######################################
 ##  get annotations
@@ -94,14 +111,22 @@ if not args.all_captions:
 
 sentences = sentences.sort_values("video_id")
 
+# get video meta data
+video_meta_data = pd.DataFrame(json_data['videos'])
+video_meta_data.drop(['url'],axis=1)
+video_meta_data['length'] = video_meta_data['end time'] - video_meta_data['start time']
+video_meta_data['category'] = video_meta_data['category'].astype(int)
+
 #######################################
 ##  get frames
 ########################################
 image_dir = args.data_path
 
 frame_lists = [
-    {'video_id': directory, 'image_files': [file for file in sorted(glob.glob(os.path.join(image_dir, directory, "*.jpg")))]}
-    for directory in next(os.walk(image_dir))[1]
+    {
+        'video_id': directory,
+        'image_files': [file for file in sorted(glob.glob(os.path.join(image_dir, directory, "*.jpg")))]
+    } for directory in next(os.walk(image_dir))[1]
 ]
 
 frame_table = pd.DataFrame(frame_lists)
@@ -111,7 +136,24 @@ frame_table = pd.DataFrame(frame_lists)
 ########################################
 
 data = pd.merge(left=frame_table, right=sentences, how="inner", on="video_id")
+data = pd.merge(left=data, right=video_meta_data, how="inner", on="video_id")
+data = data.set_index("video_id")
+if args.filter:
+    data = data[data['category'] == args.filter]
 data.to_csv('processed_data.csv')
+
+# print statistical info for debugging, etc.
+logging.debug(f"\nraw data:\n{data}")
+logging.debug(f"\ndata stats:\n{data.describe()}")
+logging.debug(f"\ncategory counts:\n{pd.value_counts(data['category'], sort=False)}")
+logging.debug(f"\nlength histogram:\n{pd.value_counts(data['length'], bins=30, sort=False)}")
+length_by_cat = pd.pivot_table(
+    data=data,
+    index="category",
+    columns="length",
+    aggfunc={"category":len},
+)
+logging.debug(length_by_cat)
 
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
@@ -122,6 +164,7 @@ params = json.dumps({
 })
 
 command = f"{base_command} '{params}'"
+
 #write command to .sh file
 with open('runner.sh', 'w') as f:
     f.write(command)
