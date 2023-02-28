@@ -152,7 +152,7 @@ length_by_category = pd.pivot_table(
     index="category",
     aggfunc={"length":{len,"mean","std"}},
 )
-logging.debug(length_by_category)
+logging.debug(f"\nLength statistics by video category:\n{length_by_category}")
 
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
