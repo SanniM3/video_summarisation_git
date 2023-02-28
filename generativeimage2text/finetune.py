@@ -35,6 +35,7 @@ from .data_layer.transform import ImageTransform2Dict
 from .data_layer.transform import get_inception_train_transform
 from .data_layer.builder import collate_fn
 from .model import get_git_model
+from math import ceil
 
 def get_data(video_file, prefix, target, tokenizer, param):
     max_text_len = 40
@@ -156,61 +157,65 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     # img = [i.unsqueeze(0).cuda() for i in img]
 
 def train(model_name, batch_size, epochs, prefixes=None):
+    """load data, break into batches, and iterate over forward-backward()
+    """
+    # read lists of frames into list from CSV
     vid_caption_df = pd.read_csv('processed_data.csv')
     video_files = list(vid_caption_df['image_files'])
-    video_files = [literal_eval(i) for i in video_files]
-    # print(video_files[0:4])
+    video_files = [literal_eval(list_of_frames) for list_of_frames in video_files] # converts lists as strings to actual lists
+
+    # read captions from CSV
     captions = list(vid_caption_df['caption'])
-    # print(len(video_files))
-    #divide training data into batches
-    train_permutations = torch.randperm(len(video_files))
-    # print(train_permutations[:10])
+    logging.info(f"number of video files read from csv: {len(video_files)}")
+
+    # divide training data into batches
+    train_permutations = torch.randperm(len(video_files)) # list of random indexes into videos    
     shuffled_video_files = [video_files[p] for p in train_permutations]
     shuffled_captions = [captions[p] for p in train_permutations]
 
-    
     def get_batches(full_list, batch_size):
+        """Make a list of batches.
+        divides a list into a list-of-lists where each nested list
+        has a length of `batch_size` """
         batches = []
-        for i in range(int(len(full_list)/batch_size)):
+        num_batches = ceil(len(full_list)/batch_size)
+        for i in range(num_batches):
             batches.append(full_list[i*batch_size : (i+1)*batch_size])
         return batches
 
-    if prefixes is None:
-        prefixes = [''] * len(captions)
+    video_file_batches = get_batches(shuffled_video_files, batch_size)
+    caption_batches = get_batches(shuffled_captions, batch_size)
 
     param = {}
-
     if File.isfile(f'aux_data/models/{model_name}/parameter.yaml'):
         param = load_from_yaml_file(f'aux_data/models/{model_name}/parameter.yaml')
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
 
-    # model
+    # load pretrained model
     model = get_git_model(tokenizer, param)
     pretrained = 'model.pt'
+    # pretrained = f'output/{model_name}/snapshot/model.pt'
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
     losses = []
     
     for epoch in range(epochs):
-
-        video_file_batches = get_batches(shuffled_video_files, batch_size)
-        caption_batches = get_batches(shuffled_captions, batch_size)
-        
         batch_losses = []           
-        #minibatch training on training_set
+ 
+        # minibatch training on training_set
         for video_files_batch, captions_batch in zip(video_file_batches, caption_batches):
-            # print(len(video_files_batch))
+            logging.info(f"processing batch of length: {len(video_files_batch)}")
             batch_loss = forward_backward(video_files_batch, model_name, captions_batch)
             batch_losses.append(batch_loss)
-        
+
         losses.append(batch_losses)
-        
+
     logging.info(losses)
+    
     #save model parameters
     torch.save(model, 'msrvtt_model.pt')
              
-
    
 def get_image_transform(param):
     crop_size = param.get('test_crop_size', 224)
