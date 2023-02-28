@@ -357,3 +357,5 @@ build/
 output/
 
 .venv/
+data_subset/random_frames
+data_subset/videos/
