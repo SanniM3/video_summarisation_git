@@ -164,8 +164,8 @@ def train(model_name, batch_size, epochs, prefixes=None):
     # print(video_files[0:4])
     captions = list(vid_caption_df['caption'])
     # print(len(video_files))
-    # if prefixes is None:
-    #     prefixes = [''] * len(captions)
+    if prefixes is None:
+        prefixes = [''] * len(captions)
 
     
     def get_batches(full_list, batch_size):
@@ -182,13 +182,17 @@ def train(model_name, batch_size, epochs, prefixes=None):
         param = load_from_yaml_file(f'aux_data/models/{model_name}/parameter.yaml')
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-
+   
     # model
     model = get_git_model(tokenizer, param)
     pretrained = 'model.pt'
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
-    losses = []
+    print('base model setup succesful!')
+    model.train()
+    model.cuda()
+    print('model moved to cuda')
+    losses = [] #keep track of losses through all epochs
     
     for epoch in range(epochs):
         print('epoch ', str(epoch))
@@ -197,19 +201,39 @@ def train(model_name, batch_size, epochs, prefixes=None):
         # print(train_permutations[:10])
         shuffled_video_files = [video_files[p] for p in train_permutations]
         shuffled_captions = [captions[p] for p in train_permutations]
+        shuffled_prefixes = [prefixes[p] for p in train_permutations]
 
         #break data into batches
         video_file_batches = get_batches(shuffled_video_files, batch_size)
         caption_batches = get_batches(shuffled_captions, batch_size)
+        prefix_batches = get_batches(shuffled_prefixes, batch_size)
         print('data successfully batched')
-        batch_losses = []   
+        
+        batch_losses = []   #keep track of losses through all batches
         i = 0 #batch number tracker        
         #minibatch training on training_set
-        for video_files_batch, captions_batch in zip(video_file_batches, caption_batches):
+        for video_files_batch, prefix_batch, captions_batch in zip(video_file_batches, prefix_batches, caption_batches):
             # print(len(video_files_batch))
             print('epoch {} batch {}'.format(str(epoch), str(i)))
-            batch_loss = forward_backward(video_files_batch, model_name, captions_batch)
-            batch_losses.append(batch_loss)
+
+            #transform minibatch data
+            batch_data = []
+            for video_file, prefix, target in zip(video_files_batch, prefix_batch, captions_batch):
+                #print(video_file)
+                data = get_data(video_file, prefix, target, tokenizer, param)
+                batch_data.append(data)
+            print('batch data transformed successfully')
+
+            data = collate_fn(batch_data)
+            data = recursive_to_device(data, 'cuda')
+            print('batch data collated and moved to cuda')
+            
+            #train model
+            loss_dict = model(data)
+            loss = sum(loss_dict.values())
+            loss.backward()
+            logging.info(loss)
+            batch_losses.append(loss)
             i += 1
         
         losses.append(batch_losses)
