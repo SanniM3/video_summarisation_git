@@ -135,7 +135,7 @@ def get_image_transform(param):
     transforms = Compose(trans)
     return transforms
 
-def multi_video_inference(video_files_path, model_name, prefixes=None):
+def multi_video_inference(video_files_path, model_path, model_name, prefixes=None):
     
     video_files_df = pd.read_csv(video_files_path)
     video_files = list(video_files_df['image_files'])
@@ -152,7 +152,7 @@ def multi_video_inference(video_files_path, model_name, prefixes=None):
     # model
     model = get_git_model(tokenizer, param)
     # pretrained = f'output/{model_name}/snapshot/model.pt'
-    pretrained = 'model.pt'
+    pretrained = model_path
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
     model.cuda()
