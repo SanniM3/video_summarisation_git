@@ -213,10 +213,16 @@ def train(model_name, batch_size, epochs, prefixes=None):
             i += 1
         
         losses.append(batch_losses)
+
+        #saved model name for this epoch
+        saved_model_name = 'msrvtt_model_epoch{}.pt'.format(str(epoch))
+
+        #save model parameters
+        torch.save(model, saved_model_name)
         
     logging.info(losses)
     #save model parameters
-    torch.save(model, 'msrvtt_model.pt')
+    # torch.save(model, 'msrvtt_model.pt')
              
 
    
