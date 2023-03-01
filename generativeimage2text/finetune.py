@@ -193,7 +193,7 @@ def train(model_name, batch_size, epochs, prefixes=None):
     model.cuda()
     print('model moved to cuda')
 
-    #use sgd optimiser
+    #use adam optimiser
     optimizer = torch.optim.Adam(model.parameters(), betas=(0.9, 0.999), lr=0.00001)
     losses = [] #keep track of losses through all epochs
     
