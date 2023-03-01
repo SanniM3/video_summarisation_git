@@ -134,20 +134,22 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     pretrained = 'model.pt'
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
-    
+    print('base model setup succesful!')
+
     # max_text_len = 40
     all_data = []
     for video_file, prefix, target in zip(video_files, prefixes, captions):
         #print(video_file)
         data = get_data(video_file, prefix, target, tokenizer, param)
         all_data.append(data)
-    
+    print('batch data transformed successfully')
     data = collate_fn(all_data)
     data = recursive_to_device(data, 'cuda')
-
+    print('batch data collated and moved to cuda')
     
     model.train()
     model.cuda()
+    print('model moved to cuda')
     loss_dict = model(data)
     loss = sum(loss_dict.values())
     loss.backward()
@@ -162,11 +164,8 @@ def train(model_name, batch_size, epochs, prefixes=None):
     # print(video_files[0:4])
     captions = list(vid_caption_df['caption'])
     # print(len(video_files))
-    #divide training data into batches
-    train_permutations = torch.randperm(len(video_files))
-    # print(train_permutations[:10])
-    shuffled_video_files = [video_files[p] for p in train_permutations]
-    shuffled_captions = [captions[p] for p in train_permutations]
+    # if prefixes is None:
+    #     prefixes = [''] * len(captions)
 
     
     def get_batches(full_list, batch_size):
@@ -175,8 +174,7 @@ def train(model_name, batch_size, epochs, prefixes=None):
             batches.append(full_list[i*batch_size : (i+1)*batch_size])
         return batches
 
-    if prefixes is None:
-        prefixes = [''] * len(captions)
+    
 
     param = {}
 
@@ -193,16 +191,26 @@ def train(model_name, batch_size, epochs, prefixes=None):
     losses = []
     
     for epoch in range(epochs):
+        print('epoch ', str(epoch))
+        #shuffle training data for current epoch
+        train_permutations = torch.randperm(len(video_files))
+        # print(train_permutations[:10])
+        shuffled_video_files = [video_files[p] for p in train_permutations]
+        shuffled_captions = [captions[p] for p in train_permutations]
 
+        #break data into batches
         video_file_batches = get_batches(shuffled_video_files, batch_size)
         caption_batches = get_batches(shuffled_captions, batch_size)
-        
-        batch_losses = []           
+        print('data successfully batched')
+        batch_losses = []   
+        i = 0 #batch number tracker        
         #minibatch training on training_set
         for video_files_batch, captions_batch in zip(video_file_batches, caption_batches):
             # print(len(video_files_batch))
+            print('epoch {} batch {}'.format(str(epoch), str(i)))
             batch_loss = forward_backward(video_files_batch, model_name, captions_batch)
             batch_losses.append(batch_loss)
+            i += 1
         
         losses.append(batch_losses)
         
