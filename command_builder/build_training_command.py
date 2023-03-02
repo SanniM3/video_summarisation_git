@@ -63,7 +63,7 @@ args.add_argument(
 
 args.add_argument(
     "-b", "--batch_size",
-    default=128, type=int,
+    default=3, type=int,
     help="""batch size for training
             """
 )
@@ -117,6 +117,13 @@ video_meta_data.drop(['url'],axis=1)
 video_meta_data['length'] = video_meta_data['end time'] - video_meta_data['start time']
 video_meta_data['category'] = video_meta_data['category'].astype(int)
 
+category_table = pd.read_table(
+    os.path.join(os.getcwd(),DATA_DIR,'category.txt'),
+    delimiter='\t',
+    header=0,
+    names=['category_name','category']
+)
+
 #######################################
 ##  get frames
 ########################################
@@ -137,22 +144,28 @@ frame_table = pd.DataFrame(frame_lists)
 
 data = pd.merge(left=frame_table, right=sentences, how="inner", on="video_id")
 data = pd.merge(left=data, right=video_meta_data, how="inner", on="video_id")
+data = pd.merge(left=data, right=category_table, how="inner", on="category")
 data = data.set_index("video_id")
+
 if args.filter:
     data = data[data['category'] == args.filter]
-data.to_csv('processed_data.csv')
 
-# print statistical info for debugging, etc.
-logging.debug(f"\nraw data:\n{data}")
-logging.debug(f"\ndata stats:\n{data.describe()}")
-logging.debug(f"\ncategory counts:\n{pd.value_counts(data['category'], sort=False)}")
-logging.debug(f"\nlength histogram:\n{pd.value_counts(data['length'], bins=20, sort=False)}")
-length_by_category = pd.pivot_table(
-    data=data,
-    index="category",
-    aggfunc={"length":{len,"mean","std"}},
-)
-logging.debug(f"\nLength statistics by video category:\n{length_by_category}")
+for split in data['split'].unique():
+    cur_split = data[ data['split'] == split ]
+    cur_split.to_csv(f'processed_data_{split}.csv')
+
+    # print statistical info for debugging, etc.
+    logging.debug(f"============= statistics for split '{split}' =============")
+    logging.debug(f"\nraw data:\n{cur_split}")
+    logging.debug(f"\ndata stats:\n{cur_split.describe()}")
+    logging.debug(f"\ncategory counts:\n{pd.value_counts(cur_split['category'], sort=False)}")
+    logging.debug(f"\nlength histogram:\n{pd.value_counts(cur_split['length'], bins=20, sort=False)}")
+    length_by_category = pd.pivot_table(
+        data=cur_split,
+        index="category",
+        aggfunc={"length":{len,"mean","std"}},
+    )
+    logging.debug(f"\nLength statistics by video category:\n{length_by_category}")
 
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
@@ -164,7 +177,7 @@ params = json.dumps({
 
 command = f"{base_command} '{params}'"
 
-#write command to .sh file
+# write command to .sh file
 with open('runner.sh', 'w') as f:
     f.write(command)
 
