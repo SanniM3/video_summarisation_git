@@ -171,8 +171,7 @@ def get_val_loss(model, tokenizer, param):
     # print(video_files[0:4])
     captions = list(vid_caption_df['caption'])
     # print(len(video_files))
-    if prefixes is None:
-        prefixes = [''] * len(captions)
+    prefixes = [''] * len(captions)
 
     #transform minibatch data
     val_data = []
