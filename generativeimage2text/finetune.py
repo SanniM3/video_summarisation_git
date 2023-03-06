@@ -174,9 +174,9 @@ def get_val_loss(model, tokenizer, param):
     prefixes = [''] * len(captions)
 
     #break data into batches
-    video_file_batches = get_batches(video_files, batch_size=4)
-    caption_batches = get_batches(captions, batch_size=4)
-    prefix_batches = get_batches(prefixes, batch_size=4)
+    video_file_batches = get_batches(video_files, batch_size=2)
+    caption_batches = get_batches(captions, batch_size=2)
+    prefix_batches = get_batches(prefixes, batch_size=2)
     print('validation data successfully batched')
 
 
