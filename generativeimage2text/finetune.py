@@ -282,6 +282,7 @@ def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
             optimizer.zero_grad()
             loss_dict = model(data)
             loss = sum(loss_dict.values())
+            print(loss_dict.keys())
             running_loss += loss 
             loss.backward()
             optimizer.step()
