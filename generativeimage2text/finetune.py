@@ -159,7 +159,7 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
 
 def get_batches(full_list, batch_size):
     batches = []
-    for i in range(int(len(full_list)/batch_size)):
+    for i in range(ceil(len(full_list)/batch_size)):
         batches.append(full_list[i*batch_size : (i+1)*batch_size])
     return batches
 
@@ -208,7 +208,7 @@ def get_val_loss(model, tokenizer, param):
           print ('running loss {}'.format(str(running_loss.item() )))
         i += 1
     print('validation data completly evaluated')
-    avg_loss = running_loss/len(data)
+    avg_loss = running_loss/len(video_files)
     return avg_loss
 
 def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
@@ -294,7 +294,7 @@ def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
         
         losses.append(batch_losses)
         
-        avg_train_loss = running_loss / len(data)
+        avg_train_loss = running_loss / len(video_files)
         running_loss = 0.0
         
         ### evaluation on validation dataset
