@@ -165,7 +165,7 @@ def get_batches(full_list, batch_size):
 
 def get_val_loss(model, tokenizer, param):
     model.train(False)
-    vid_caption_df = pd.read_csv('processed_data.csv')
+    vid_caption_df = pd.read_csv('processed_data.csv')[:20]
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
     # print(video_files[0:4])
@@ -173,24 +173,42 @@ def get_val_loss(model, tokenizer, param):
     # print(len(video_files))
     prefixes = [''] * len(captions)
 
-    #transform minibatch data
-    val_data = []
-    for video_file, prefix, target in zip(video_files, prefixes, captions):
-        #print(video_file)
-        data = get_data(video_file, prefix, target, tokenizer, param)
-        val_data.append(data)
-    print('validation data transformed successfully')
+    #break data into batches
+    video_file_batches = get_batches(video_files, batch_size=4)
+    caption_batches = get_batches(captions, batch_size=4)
+    prefix_batches = get_batches(prefixes, batch_size=4)
+    print('validation data successfully batched')
 
-    data = collate_fn(val_data)
-    data = recursive_to_device(data, 'cuda')
-    print('validation data collated and moved to cuda')
 
-    loss = sum(model(data).values())
-    avg_loss = loss/len(data)
+    running_loss = 0.0
+    i = 0 #batch number tracker        
+    #minibatch prediction on validation data
+    for video_files_batch, prefix_batch, captions_batch in zip(video_file_batches, prefix_batches, caption_batches):
+
+        #transform minibatch data
+        batch_data = []
+        for video_file, prefix, target in zip(video_files_batch, prefix_batch, captions_batch):
+            #print(video_file)
+            data = get_data(video_file, prefix, target, tokenizer, param)
+            batch_data.append(data)
+        print('batch data {} transformed successfully'.format(str(i)))
+
+        data = collate_fn(batch_data)
+        data = recursive_to_device(data, 'cuda')
+        print('batch data collated and moved to cuda')
+
+        #obtain loss for batch
+        loss_dict = model(data)
+        loss = sum(loss_dict.values())
+        running_loss += loss
+        print ('running loss {}'.format(str(running_loss)))
+        i += 1
+    print('validation data completly evaluated')
+    avg_loss = running_loss/len(data)
     return avg_loss
 
 def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
-    vid_caption_df = pd.read_csv('processed_data.csv')
+    vid_caption_df = pd.read_csv('processed_data.csv')[:20]
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
     # print(video_files[0:4])
