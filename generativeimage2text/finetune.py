@@ -164,7 +164,7 @@ def get_batches(full_list, batch_size):
     return batches
 
 def get_val_loss(model, tokenizer, param):
-    #model.train(False)
+    model.train(False)
     vid_caption_df = pd.read_csv('processed_data.csv')[:20]
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
@@ -200,6 +200,8 @@ def get_val_loss(model, tokenizer, param):
         #obtain loss for batch
         with torch.no_grad():
           loss_dict = model(data)
+          del loss_dict['predictions']
+          del loss_dict['logprobs']
           loss = sum(loss_dict.values())
           #print(loss.item())
           running_loss += loss
