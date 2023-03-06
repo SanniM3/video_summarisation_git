@@ -200,7 +200,8 @@ def get_val_loss(model, tokenizer, param):
         #obtain loss for batch
         loss_dict = model(data)
         loss = sum(loss_dict.values())
-        running_loss += loss
+        print(loss.item())
+        running_loss += loss.item()
         print ('running loss {}'.format(str(running_loss)))
         i += 1
     print('validation data completly evaluated')
