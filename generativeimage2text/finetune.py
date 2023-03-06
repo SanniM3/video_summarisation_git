@@ -174,9 +174,9 @@ def get_val_loss(model, tokenizer, param):
     prefixes = [''] * len(captions)
 
     #break data into batches
-    video_file_batches = get_batches(video_files, batch_size=2)
-    caption_batches = get_batches(captions, batch_size=2)
-    prefix_batches = get_batches(prefixes, batch_size=2)
+    video_file_batches = get_batches(video_files, batch_size=4)
+    caption_batches = get_batches(captions, batch_size=4)
+    prefix_batches = get_batches(prefixes, batch_size=4)
     print('validation data successfully batched')
 
 
@@ -201,9 +201,9 @@ def get_val_loss(model, tokenizer, param):
         with torch.no_grad():
           loss_dict = model(data)
           loss = sum(loss_dict.values())
-          print(loss.item())
-          running_loss += loss.item()
-          print ('running loss {}'.format(str(running_loss)))
+          #print(loss.item())
+          running_loss += loss
+          print ('running loss {}'.format(str(running_loss.item() )))
         i += 1
     print('validation data completly evaluated')
     avg_loss = running_loss/len(data)
