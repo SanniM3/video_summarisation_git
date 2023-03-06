@@ -157,7 +157,40 @@ def forward_backward(video_files, model_name, captions, prefixes=None):
     return loss
     # img = [i.unsqueeze(0).cuda() for i in img]
 
-def train(model_name, batch_size, epochs, prefixes=None):
+def get_batches(full_list, batch_size):
+    batches = []
+    for i in range(int(len(full_list)/batch_size)):
+        batches.append(full_list[i*batch_size : (i+1)*batch_size])
+    return batches
+
+def get_val_loss(model, tokenizer, param):
+    model.train(False)
+    vid_caption_df = pd.read_csv('processed_data.csv')
+    video_files = list(vid_caption_df['image_files'])
+    video_files = [literal_eval(i) for i in video_files]
+    # print(video_files[0:4])
+    captions = list(vid_caption_df['caption'])
+    # print(len(video_files))
+    if prefixes is None:
+        prefixes = [''] * len(captions)
+
+    #transform minibatch data
+    val_data = []
+    for video_file, prefix, target in zip(video_files, prefixes, captions):
+        #print(video_file)
+        data = get_data(video_file, prefix, target, tokenizer, param)
+        val_data.append(data)
+    print('validation data transformed successfully')
+
+    data = collate_fn(val_data)
+    data = recursive_to_device(data, 'cuda')
+    print('validation data collated and moved to cuda')
+
+    loss = sum(model(data).values())
+    avg_loss = loss/len(data)
+    return avg_loss
+
+def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
     vid_caption_df = pd.read_csv('processed_data.csv')
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
@@ -168,14 +201,6 @@ def train(model_name, batch_size, epochs, prefixes=None):
         prefixes = [''] * len(captions)
 
     
-    def get_batches(full_list, batch_size):
-        batches = []
-        for i in range(int(len(full_list)/batch_size)):
-            batches.append(full_list[i*batch_size : (i+1)*batch_size])
-        return batches
-
-    
-
     param = {}
 
     if File.isfile(f'aux_data/models/{model_name}/parameter.yaml'):
@@ -189,7 +214,6 @@ def train(model_name, batch_size, epochs, prefixes=None):
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
     print('base model setup succesful!')
-    model.train()
     model.cuda()
     print('model moved to cuda')
 
@@ -197,8 +221,11 @@ def train(model_name, batch_size, epochs, prefixes=None):
     optimizer = torch.optim.Adam(model.parameters(), betas=(0.9, 0.999), lr=0.00001)
     losses = [] #keep track of losses through all epochs
     
+    best_val_loss = 1000000.
+
     for epoch in range(epochs):
-        print('epoch ', str(epoch))
+        print('epoch ', str(epoch+1))
+        model.train(True)
         #shuffle training data for current epoch
         train_permutations = torch.randperm(len(video_files))
         # print(train_permutations[:10])
@@ -213,6 +240,7 @@ def train(model_name, batch_size, epochs, prefixes=None):
         print('data successfully batched')
         
         batch_losses = []   #keep track of losses through all batches
+        running_loss = 0.0
         i = 0 #batch number tracker        
         #minibatch training on training_set
         for video_files_batch, prefix_batch, captions_batch in zip(video_file_batches, prefix_batches, caption_batches):
@@ -235,6 +263,7 @@ def train(model_name, batch_size, epochs, prefixes=None):
             optimizer.zero_grad()
             loss_dict = model(data)
             loss = sum(loss_dict.values())
+            running_loss += loss 
             loss.backward()
             optimizer.step()
             logging.info(loss)
@@ -242,16 +271,30 @@ def train(model_name, batch_size, epochs, prefixes=None):
             i += 1
         
         losses.append(batch_losses)
+        
+        avg_train_loss = running_loss / len(data)
+        running_loss = 0.0
+        
+        ### evaluation on validation dataset
+        avg_val_loss = get_val_loss(model, tokenizer, param)
+        print('epoch {}, avg_train_loss: {}, avg_val_loss: {}'.format(str(epoch+1), avg_train_loss, avg_val_loss))
+        if torch.abs(avg_val_loss - best_val_loss) < threshold:
+            #saved model name for this epoch
+            saved_model_name = 'msrvtt_model_epoch{}.pt'.format(str(epoch))
+            #save model parameters
+            torch.save(model, saved_model_name)
+            break
 
-        #saved model name for this epoch
-        saved_model_name = 'msrvtt_model_epoch{}.pt'.format(str(epoch))
-
-        #save model parameters
-        torch.save(model, saved_model_name)
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            #saved model name for this epoch
+            saved_model_name = 'msrvtt_model_epoch{}.pt'.format(str(epoch))
+            #save model parameters
+            torch.save(model, saved_model_name)            
+        
         
     logging.info(losses)
-    #save model parameters
-    # torch.save(model, 'msrvtt_model.pt')
+    
              
 
    
