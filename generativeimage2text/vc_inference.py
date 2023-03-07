@@ -145,7 +145,7 @@ def get_image_transform(param):
 
 def multi_video_inference(model_path, model_name, prefixes=None):
     
-    video_files_df = pd.read_csv('processed_data.csv')[:20]
+    video_files_df = pd.read_csv('processed_data.csv')[:4]
     video_files = list(video_files_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
 
@@ -168,6 +168,7 @@ def multi_video_inference(model_path, model_name, prefixes=None):
 
     vid_to_caption = {}
     for video_file, prefix in zip(video_files, prefixes):
+        i=0
         img = [load_image_by_pil(i) for i in video_file]
 
         transforms = get_image_transform(param)
@@ -195,8 +196,10 @@ def multi_video_inference(model_path, model_name, prefixes=None):
             })
         cap = tokenizer.decode(result['predictions'][0].tolist(), skip_special_tokens=True)
         logging.info('output: {}'.format(cap))
+        
         # video_file_name = op.split(video_file)[-1].split('_')[0]
         vid_to_caption[video_file] = cap
+        i += 1
 
     #write dictionary to json
     with open("predictions.json", "w") as f:
