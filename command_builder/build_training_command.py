@@ -78,7 +78,13 @@ args.add_argument(
 args.add_argument(
     "-v", "--verbose",
     action="store_true",
-    help="print debugging output"
+    help="print info level logging"
+)
+
+args.add_argument(
+    "-vv", "--debug",
+    action="store_true",
+    help="print debug level logging"
 )
 
 args.add_argument(
@@ -91,6 +97,8 @@ args = args.parse_args()
 
 # show/hide debugging
 if args.verbose:
+    logging.getLogger().setLevel(logging.INFO)
+if args.debug:
     logging.getLogger().setLevel(logging.DEBUG)
 
 #######################################
@@ -127,6 +135,8 @@ category_table = pd.read_table(
 #######################################
 ##  get frames
 ########################################
+logging.debug(f"================= getting Frames =================")
+
 image_dir = args.data_path
 
 frame_lists = [
@@ -135,8 +145,14 @@ frame_lists = [
         'image_files': [file for file in sorted(glob.glob(os.path.join(image_dir, directory, "*.jpg")))]
     } for directory in next(os.walk(image_dir))[1]
 ]
-
 frame_table = pd.DataFrame(frame_lists)
+num_videos =len(frame_lists)
+num_frames = frame_table.explode('image_files')['image_files'].count()
+logging.debug(f"number of directories (i.e. videos) found: {num_videos}")
+logging.debug(f"number of frames found: {num_frames}")
+if num_videos < 1 or num_frames < 1:
+    raise Exception(f"Couldn't find any videos/frames. videos: '{num_videos}', frames: '{num_frames}'") 
+
 
 ########################################
 ##  Merge (inner join captions with frames)
@@ -150,22 +166,27 @@ data = data.set_index("video_id")
 if args.filter:
     data = data[data['category'] == args.filter]
 
-for split in data['split'].unique():
+splits = data['split'].unique()
+logging.debug(f"creating csv files for data splits: '{splits}'")
+for split in splits:
     cur_split = data[ data['split'] == split ]
-    cur_split.to_csv(f'processed_data_{split}.csv')
+    csv_out = f'processed_data_{split}.csv'
+    cur_split.to_csv(csv_out)
+    logging.debug(f"  creating '{csv_out}': {'SUCCESS' if os.path.isfile(csv_out) else 'FAIL'}")
+
 
     # print statistical info for debugging, etc.
-    logging.debug(f"============= statistics for split '{split}' =============")
-    logging.debug(f"\nraw data:\n{cur_split}")
-    logging.debug(f"\ndata stats:\n{cur_split.describe()}")
-    logging.debug(f"\ncategory counts:\n{pd.value_counts(cur_split['category'], sort=False)}")
-    logging.debug(f"\nlength histogram:\n{pd.value_counts(cur_split['length'], bins=20, sort=False)}")
+    logging.info(f"============= statistics for split '{split}' =============")
+    logging.info(f"\nraw data:\n{cur_split}")
+    logging.info(f"\ndata stats:\n{cur_split.describe()}")
+    logging.info(f"\ncategory counts:\n{pd.value_counts(cur_split['category'], sort=False)}")
+    logging.info(f"\nlength histogram:\n{pd.value_counts(cur_split['length'], bins=20, sort=False)}")
     length_by_category = pd.pivot_table(
         data=cur_split,
         index="category",
         aggfunc={"length":{len,"mean","std"}},
     )
-    logging.debug(f"\nLength statistics by video category:\n{length_by_category}")
+    logging.info(f"\nLength statistics by video category:\n{length_by_category}")
 
 base_command = "python -m generativeimage2text.finetune -p"
 params = json.dumps({
