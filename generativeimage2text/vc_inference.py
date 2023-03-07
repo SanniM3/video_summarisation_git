@@ -168,7 +168,6 @@ def multi_video_inference(model_path, model_name, prefixes=None):
 
     vid_to_caption = {}
     for video_file, prefix in zip(video_files, prefixes):
-        i=0
         img = [load_image_by_pil(i) for i in video_file]
 
         transforms = get_image_transform(param)
@@ -197,9 +196,9 @@ def multi_video_inference(model_path, model_name, prefixes=None):
         cap = tokenizer.decode(result['predictions'][0].tolist(), skip_special_tokens=True)
         logging.info('output: {}'.format(cap))
         
-        # video_file_name = op.split(video_file)[-1].split('_')[0]
-        vid_to_caption[i] = cap
-        i += 1
+        video_file_name = op.split(video_file[0])[-1].split('_')[0]
+        vid_to_caption[video_file_name] = cap
+        
 
     #write dictionary to json
     with open("predictions.json", "w") as f:
