@@ -972,53 +972,53 @@ class CaptioningModel(nn.Module):
                 output_dict['feat'] = feat
         else:
             output_dict = self.infer(batch, visual_features, visual_features_valid)
-            caption_token_input = batch["caption_tokens"]
-            #caption_lengths = batch["caption_lengths"]
+            # caption_token_input = batch["caption_tokens"]
+            # #caption_lengths = batch["caption_lengths"]
 
-            output_logits = self.textual(
-                visual_features,
-                caption_token_input,
-                #caption_lengths=caption_lengths,
-                hidden_valid_mask=visual_features_valid,
-                bi_valid_mask_caption=batch.get('bi_valid_mask_caption'),
-            )
+            # output_logits = self.textual(
+            #     visual_features,
+            #     caption_token_input,
+            #     #caption_lengths=caption_lengths,
+            #     hidden_valid_mask=visual_features_valid,
+            #     bi_valid_mask_caption=batch.get('bi_valid_mask_caption'),
+            # )
             
-            #output_logits = x['output_logits']
-            #ipdb> output_logits.shape
-            #torch.Size([2, 13, 30522])
-            #ipdb> batch['caption_tokens'].shape
-            #torch.Size([2, 13])
-            if 'need_predict' in batch:
-                target = batch["caption_tokens"].clone()
-                if self.padding_idx is not None:
-                    target[batch['need_predict'] == 0] = self.padding_idx
-            else:
-                assert ValueError()
-                #target = batch["caption_tokens"]
-            need_predict = batch['need_predict']
-            feat = output_logits[:, :-1].contiguous()
-            target = target[:, 1:].contiguous()
-            need_predict = need_predict[:, 1:].contiguous()
-            feat = feat.view(-1, self.textual.vocab_size)
-            target = target.view(-1)
-            need_predict = need_predict.view(-1)
+            # #output_logits = x['output_logits']
+            # #ipdb> output_logits.shape
+            # #torch.Size([2, 13, 30522])
+            # #ipdb> batch['caption_tokens'].shape
+            # #torch.Size([2, 13])
+            # if 'need_predict' in batch:
+            #     target = batch["caption_tokens"].clone()
+            #     if self.padding_idx is not None:
+            #         target[batch['need_predict'] == 0] = self.padding_idx
+            # else:
+            #     assert ValueError()
+            #     #target = batch["caption_tokens"]
+            # need_predict = batch['need_predict']
+            # feat = output_logits[:, :-1].contiguous()
+            # target = target[:, 1:].contiguous()
+            # need_predict = need_predict[:, 1:].contiguous()
+            # feat = feat.view(-1, self.textual.vocab_size)
+            # target = target.view(-1)
+            # need_predict = need_predict.view(-1)
 
-            valid_mask = need_predict == 1
-            #valid_mask2 = target != self.padding_idx
-            #assert (valid_mask.long() - valid_mask2.long()).abs().sum().cpu() == 0
+            # valid_mask = need_predict == 1
+            # #valid_mask2 = target != self.padding_idx
+            # #assert (valid_mask.long() - valid_mask2.long()).abs().sum().cpu() == 0
 
-            target = target[valid_mask]
-            feat = feat[valid_mask]
-            loss = self.loss(feat, target)
-            if (self.verbose['num_has_image'] + self.verbose['num_no_image']) % 200 == 0:
-                logging.info(self.verbose)
-            hint = 'l' if 'context_target_type' not in batch else batch['context_target_type'][0]
-            if has_image:
-                output_dict.update({'vl_{}_loss'.format(hint): loss})
-                self.verbose['num_has_image'] += 1
-            else:
-                output_dict.update({'l_{}_loss'.format(hint): loss})
-                self.verbose['num_no_image'] += 1
+            # target = target[valid_mask]
+            # feat = feat[valid_mask]
+            # loss = self.loss(feat, target)
+            # if (self.verbose['num_has_image'] + self.verbose['num_no_image']) % 200 == 0:
+            #     logging.info(self.verbose)
+            # hint = 'l' if 'context_target_type' not in batch else batch['context_target_type'][0]
+            # if has_image:
+            #     output_dict.update({'vl_{}_loss'.format(hint): loss})
+            #     self.verbose['num_has_image'] += 1
+            # else:
+            #     output_dict.update({'l_{}_loss'.format(hint): loss})
+            #     self.verbose['num_no_image'] += 1
         return output_dict
 
     def infer(self, batch, visual_features, visual_features_valid,
