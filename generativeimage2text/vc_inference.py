@@ -161,8 +161,9 @@ def multi_video_inference(model_path, model_name, prefixes=None):
     model = get_git_model(tokenizer, param)
     # pretrained = f'output/{model_name}/snapshot/model.pt'
     pretrained = model_path
-    checkpoint = torch_load(pretrained)['model']
-    load_state_dict(model, checkpoint)
+    # checkpoint = torch_load(pretrained)['model']
+    # load_state_dict(model, checkpoint)
+    model.load_state_dict(torch.load(pretrained))
     model.cuda()
     model.eval()
 
