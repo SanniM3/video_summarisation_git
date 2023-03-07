@@ -304,7 +304,7 @@ def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
             #saved model name for this epoch
             saved_model_name = 'msrvtt_model_epoch{}.pt'.format(str(epoch))
             #save model parameters
-            torch.save(model, saved_model_name)
+            torch.save(model.state_dict(), saved_model_name)
             break
 
         if avg_val_loss < best_val_loss:
@@ -312,7 +312,7 @@ def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
             #saved model name for this epoch
             saved_model_name = 'msrvtt_model_epoch{}.pt'.format(str(epoch))
             #save model parameters
-            torch.save(model, saved_model_name)            
+            torch.save(model.state_dict(), saved_model_name)            
         
         
     logging.info(losses)
