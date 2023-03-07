@@ -166,7 +166,7 @@ def get_batches(full_list, batch_size):
 
 def get_val_loss(validation_csv, model, tokenizer, param):
     model.validation = True
-    vid_caption_df = pd.read_csv(validation_csv)[:20]
+    vid_caption_df = pd.read_csv(validation_csv)
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
     # print(video_files[0:4])
@@ -206,14 +206,14 @@ def get_val_loss(validation_csv, model, tokenizer, param):
           loss = sum(loss_dict.values())
           #print(loss.item())
           running_loss += loss
-          print ('running loss {}'.format(str(running_loss.item() )))
+        #   print ('running loss {}'.format(str(running_loss.item() )))
         i += 1
     print('validation data completly evaluated')
     avg_loss = running_loss/len(video_files)
     return avg_loss
 
 def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0.001, prefixes=None):
-    vid_caption_df = pd.read_csv(train_csv)[:20]
+    vid_caption_df = pd.read_csv(train_csv)
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
     # print(video_files[0:4])
