@@ -164,9 +164,9 @@ def get_batches(full_list, batch_size):
         batches.append(full_list[i*batch_size : (i+1)*batch_size])
     return batches
 
-def get_val_loss(model, tokenizer, param):
+def get_val_loss(validation_csv, model, tokenizer, param):
     model.validation = True
-    vid_caption_df = pd.read_csv('processed_data.csv')[:20]
+    vid_caption_df = pd.read_csv(validation_csv)[:20]
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
     # print(video_files[0:4])
@@ -212,8 +212,8 @@ def get_val_loss(model, tokenizer, param):
     avg_loss = running_loss/len(video_files)
     return avg_loss
 
-def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
-    vid_caption_df = pd.read_csv('processed_data.csv')[:20]
+def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0.001, prefixes=None):
+    vid_caption_df = pd.read_csv(train_csv)[:20]
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
     # print(video_files[0:4])
@@ -241,7 +241,8 @@ def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
 
     #use adam optimiser
     optimizer = torch.optim.Adam(model.parameters(), betas=(0.9, 0.999), lr=0.00001)
-    losses = [] #keep track of losses through all epochs
+    train_losses = [] #keep track of validation losses through all epochs
+    val_losses = [] #keep track of validation losses through all epochs
     
     best_val_loss = 1000000.
 
@@ -293,13 +294,13 @@ def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
             batch_losses.append(loss)
             i += 1
         
-        losses.append(batch_losses)
-        
         avg_train_loss = running_loss / len(video_files)
+        train_losses.append(avg_train_loss)
         running_loss = 0.0
         
         ### evaluation on validation dataset
-        avg_val_loss = get_val_loss(model, tokenizer, param)
+        avg_val_loss = get_val_loss(validation_csv, model, tokenizer, param)
+        val_losses.append(avg_val_loss)
         print('epoch {}, avg_train_loss: {}, avg_val_loss: {}'.format(str(epoch+1), avg_train_loss, avg_val_loss))
         if torch.abs(avg_val_loss - best_val_loss) < threshold:
             #saved model name for this epoch
@@ -315,8 +316,9 @@ def train(model_name, batch_size, epochs, threshold=0.001, prefixes=None):
             #save model parameters
             torch.save(model.state_dict(), saved_model_name)            
         
-        
-    logging.info(losses)
+    print('Average training losses over all epochs: {}'.format(str(train_losses)))    
+    print('Average validation losses over all epochs: {}'.format(str(val_losses)))   
+    
     
              
 

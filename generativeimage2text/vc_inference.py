@@ -143,9 +143,9 @@ def get_image_transform(param):
     transforms = Compose(trans)
     return transforms
 
-def multi_video_inference(model_path, model_name, prefixes=None):
+def multi_video_inference(videos_csv, model_path, model_name, prefixes=None):
     
-    video_files_df = pd.read_csv('processed_data.csv')[:4]
+    video_files_df = pd.read_csv(videos_csv)
     video_files = list(video_files_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
 
