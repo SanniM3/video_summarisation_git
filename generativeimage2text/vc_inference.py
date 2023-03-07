@@ -198,7 +198,7 @@ def multi_video_inference(model_path, model_name, prefixes=None):
         logging.info('output: {}'.format(cap))
         
         # video_file_name = op.split(video_file)[-1].split('_')[0]
-        vid_to_caption[video_file] = cap
+        vid_to_caption[i] = cap
         i += 1
 
     #write dictionary to json
