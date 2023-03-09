@@ -36,6 +36,9 @@ from .data_layer.transform import get_inception_train_transform
 from .data_layer.builder import collate_fn
 from .model import get_git_model
 
+from .metrics.eval import EvalCap
+import os
+
 
 class MinMaxResizeForTest(object):
     def __init__(self, min_size, max_size):
@@ -143,7 +146,11 @@ def get_image_transform(param):
     transforms = Compose(trans)
     return transforms
 
-def multi_video_inference(videos_csv, model_path, model_name, prefixes=None):
+def multi_video_inference(videos_csv, annotations_json_path, model_path, model_name, prefixes=None):
+    
+    """
+    annotations_json_path: path to json containing original video annotataions
+    """
     
     video_files_df = pd.read_csv(videos_csv)
     video_files = list(video_files_df['image_files'])
@@ -198,16 +205,25 @@ def multi_video_inference(videos_csv, model_path, model_name, prefixes=None):
         logging.info('output: {}'.format(cap))
         
         video_file_name = op.split(video_file[0])[-1].split('_')[0]
-        vid_to_caption[video_file_name] = cap
         
-
-    #write dictionary to json
+        vid_to_caption[video_file_name] = [{'caption': cap,
+                                            "video_id": video_file_name}]
+    
+    # write dictionary to json
     with open("predictions.json", "w") as f:
         json.dump(vid_to_caption, f)
-
-
-
-
+    
+    # evaluate metrics
+    metrics_obj = EvalCap(os.path.join(os.getcwd(),"predictions.json"),
+                          annotations_json_path)
+    metrics_obj.evaluate()
+    
+    # save metrics
+    metrics = pd.DataFrame(data={'Metric Name':[], 'Metric Value':[]})
+    for metric, score in metrics_obj.eval.items():
+        metrics.append({'Metric Name':metric, 'Metric Value':score}, ignore_index=True)
+    
+    metrics.to_csv('metrics.csv', index=False)
 
 if __name__ == '__main__':
     init_logging()
