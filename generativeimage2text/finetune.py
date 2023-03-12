@@ -166,7 +166,7 @@ def get_batches(full_list, batch_size):
 
 def get_val_loss(validation_csv, model, tokenizer, param):
     model.eval()
-    model.validation = True
+    model.validation = True #model attribute to calculate loss
     vid_caption_df = pd.read_csv(validation_csv)
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
@@ -213,7 +213,7 @@ def get_val_loss(validation_csv, model, tokenizer, param):
     avg_loss = running_loss/len(video_files)
     return avg_loss
 
-def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0.001, prefixes=None):
+def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0.0001, prefixes=None):
     vid_caption_df = pd.read_csv(train_csv)
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
@@ -297,7 +297,7 @@ def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0
         
         avg_train_loss = running_loss / len(video_files)
         train_losses.append(avg_train_loss)
-        running_loss = 0.0
+        # running_loss = 0.0
         
         ### evaluation on validation dataset
         avg_val_loss = get_val_loss(validation_csv, model, tokenizer, param)
@@ -305,7 +305,7 @@ def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0
         print('epoch {}, avg_train_loss: {}, avg_val_loss: {}'.format(str(epoch+1), avg_train_loss, avg_val_loss))
         if torch.abs(avg_val_loss - best_val_loss) < threshold:
             #saved model name for this epoch
-            saved_model_name = 'msrvtt_model_epoch{}.pt'.format(str(epoch))
+            saved_model_name = 'best_msrvtt_model_epoch{}.pt'.format(str(epoch))
             #save model parameters
             torch.save(model.state_dict(), saved_model_name)
             break
@@ -313,9 +313,15 @@ def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             #saved model name for this epoch
-            saved_model_name = 'msrvtt_model_epoch{}.pt'.format(str(epoch))
+            saved_model_name = 'better_msrvtt_model_epoch{}.pt'.format(str(epoch))
             #save model parameters
-            torch.save(model.state_dict(), saved_model_name)            
+            torch.save(model.state_dict(), saved_model_name)  
+        #for epochs that did not improve in terms of validation loss  
+        else:            
+            #saved model name for this epoch
+            saved_model_name = 'regular_msrvtt_model_epoch{}.pt'.format(str(epoch))
+            #save model parameters
+            torch.save(model.state_dict(), saved_model_name)        
         
     print('Average training losses over all epochs: {}'.format(str(train_losses)))    
     print('Average validation losses over all epochs: {}'.format(str(val_losses)))   
