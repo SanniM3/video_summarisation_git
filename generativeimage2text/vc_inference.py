@@ -174,7 +174,7 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
     model.cuda()
     model.eval()
 
-    vid_to_caption = {}
+    vid_to_caption = {"videos": [], "sentences": []}
     for video_file, prefix in zip(video_files, prefixes):
         img = [load_image_by_pil(i) for i in video_file]
 
@@ -206,13 +206,14 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
         
         video_file_name = op.split(video_file[0])[-1].split('_')[0]
         
-        vid_to_caption[video_file_name] = [{'caption': cap,
-                                            "video_id": video_file_name}]
+        vid_to_caption["videos"].append({'video_id': video_file_name})
+        vid_to_caption["sentences"].append({'video_id': video_file_name,
+                                            'caption': cap})
     
     # write dictionary to json
-    with open("predictions.json", "w") as f:
+    with open(os.path.join(os.getcwd(),"predictions.json"), "w") as f:
         json.dump(vid_to_caption, f)
-    
+
     # evaluate metrics
     metrics_obj = EvalCap(os.path.join(os.getcwd(),"predictions.json"),
                           annotations_json_path)
