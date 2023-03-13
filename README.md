@@ -15,7 +15,8 @@ pip install -r requirements_2.txt
 ## General Workflow:
 
 ### 1.  Download Data
-Suggested directory structure:
+Calling `./download_data.sh` will do this for you and setup the following
+directory structure
 
 ```
 video_summarisation_git/data/
