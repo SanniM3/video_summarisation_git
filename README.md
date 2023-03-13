@@ -45,19 +45,28 @@ create dataset of frames with one of the following:
 * https://storage.googleapis.com/mlpgit/data/train_val/random_frames.zip
 * https://storage.googleapis.com/mlpgit/data/train_val/transnet_frames.zip
 
-### 3.  Finetune Model
-Do this for *ONE* selected sampling method using the following
+### 3.  Create training csv
+```
+python command_builder/training_command.py -d data/train_val/random_frames/ -c data/train_val/train_val_videodatainfo.json
+# or
+python command_builder/training_command.py -d data/train_val/transnet_frames/ -c data/train_val/train_val_videodatainfo.json
+
+```
+
+### 4.  Finetune Model
+Do this for *ONE* selected sampling method using the following. Alternatively you can call `./runner.sh` which shoud have everything you need, and will be representative of the last data you called the training command builder on
+
 ```
 python -m generativeimage2text.finetune -p '{
     "type": "train",
     "model_name": "GIT_BASE_VATEX",
     "batch_size": 3,
     "epochs": 2, ##############<----- 50?
-    "train_csv": "processed_data_train.csv", # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
-    "validation_csv": "processed_data_validate.csv" # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
+    "train_csv": "data/train_val/random_frames/processed_data_train.csv", # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
+    "validation_csv": "data/train_val/random_frames/processed_data_validate.csv" # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
 }
 ``` 
-### 4.  Run Inference
+### 5.  Run Inference
 on test set:
 
 ```
