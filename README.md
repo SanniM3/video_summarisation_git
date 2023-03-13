@@ -7,9 +7,9 @@ You should still follow all the directions in the official "Introduction" below 
 ```
 pip install -r requirements_2.txt
 ```
-2. Download pretrained vatex model
+2. Download pretrained model
 ```
-./get_pretrained_vatex.sh
+./get_pretrained_model.sh
 ```
 
 ## General Workflow:
@@ -59,7 +59,7 @@ Do this for *ONE* selected sampling method using the following. Alternatively yo
 ```
 python -m generativeimage2text.finetune -p '{
     "type": "train",
-    "model_name": "GIT_BASE_VATEX",
+    "model_name": "GIT_BASE",
     "batch_size": 3,
     "epochs": 2, ##############<----- 50?
     "train_csv": "data/train_val/random_frames/processed_data_train.csv", # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
