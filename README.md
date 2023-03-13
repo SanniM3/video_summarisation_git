@@ -78,6 +78,7 @@ and will be representative of the *last data* you called the training command bu
 python -m generativeimage2text.finetune -p '{
     "type": "train",
     "model_name": "GIT_BASE",
+    "model_path": "model.pt",
     "batch_size": 3,
     "epochs": 2, ##############<----- 50?
     "train_csv": "data/train_val/{FRAME DIRECTORY HERE}/processed_data_train.csv", # Be sure to swap out {FRAME DIRECTORY HERE} for the directory where your frames are
