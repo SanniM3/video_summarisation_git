@@ -49,10 +49,11 @@ video_summarisation_git/data/
 
 #### To do it fully by hand:
 
-for each sampling method:
+for each sampling method:\
 create dataset of frames with one of the following:
-    python sampling_scripts/random_frame_sampling.py -data_dir "${VIDEO_DIR}"
-    python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"
+
+* `python sampling_scripts/random_frame_sampling.py -data_dir "${VIDEO_DIR}"`
+* `python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"`
 
 ### 3.  Create training csv
 
