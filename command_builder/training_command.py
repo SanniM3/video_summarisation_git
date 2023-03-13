@@ -10,7 +10,7 @@ import random
 import pathlib
 import logging
 
-DATA_DIR = "data_subset"
+DATA_DIR = os.path.join("data","train_val")
 RAND_SEED = 202302241120
 #######################################
 ## Arguments
@@ -36,12 +36,6 @@ args.add_argument(
 )
 
 args.add_argument(
-    "-o", "--dataframe_file", type=pathlib.Path,
-    default=os.path.join(os.getcwd(),DATA_DIR,'processed_data.csv'),
-    help="path to dataframe containig video-to-caption mapping"
-)
-
-args.add_argument(
     "-a", "--all-captions",
     action="store_true",
     help="""create fine tune command for ALL captions.
@@ -53,11 +47,9 @@ args.add_argument(
 
 args.add_argument(
     "-m", "--model",
-    default="GIT_BASE_VATEX",
+    default="GIT_BASE",
     help="""The name of the model to fine tune.
-            Default is GIT_BASE_VATEX. NOTE: Other values may not work
-            since pretraining script assumes vatex.
-            We may want to consider GIT_BASE_MSRVTT_QA
+            Default is GIT_BASE.
             """
 )
 
@@ -126,7 +118,7 @@ video_meta_data['length'] = video_meta_data['end time'] - video_meta_data['start
 video_meta_data['category'] = video_meta_data['category'].astype(int)
 
 category_table = pd.read_table(
-    os.path.join(os.getcwd(),DATA_DIR,'category.txt'),
+    pathlib.Path(os.path.join(os.getcwd(),DATA_DIR)).parent / 'category.txt',
     delimiter='\t',
     header=0,
     names=['category_name','category']
@@ -135,6 +127,7 @@ category_table = pd.read_table(
 #######################################
 ##  get frames
 ########################################
+
 logging.debug(f"================= getting Frames =================")
 
 image_dir = args.data_path
@@ -172,7 +165,8 @@ csv_files = {}
 for split in splits:
     cur_split = data[ data['split'] == split ]
     csv_out = f'processed_data_{split}.csv'
-    csv_files[split] = csv_out
+    csv_out = pathlib.Path(image_dir) / csv_out
+    csv_files[split] = str(csv_out)
     cur_split.to_csv(csv_out)
     logging.debug(f"  creating '{csv_out}': {'SUCCESS' if os.path.isfile(csv_out) else 'FAIL'}")
 
@@ -200,7 +194,7 @@ params = json.dumps({
     "validation_csv": csv_files['validate']
 })
 
-command = f"{base_command} '{params}\n'"
+command = f"{base_command} '{params}'\n"
 
 # write command to .sh file
 with open('runner.sh', 'w') as f:

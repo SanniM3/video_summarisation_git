@@ -7,26 +7,87 @@ You should still follow all the directions in the official "Introduction" below 
 ```
 pip install -r requirements_2.txt
 ```
-2. Download pretrained vatex model
+2. Download pretrained model
 ```
-./get_pretrained_vatex.sh
+./get_pretrained_model.sh
 ```
 
-## Get things going
-1. sample videos \& create fine tuning command
+## General Workflow:
+
+### 1.  Download Data
+Calling `./download_data.sh` will do this for you and setup the following
+directory structure
+
 ```
-./setup_data.sh # assumes .venv is your virtual environment. may not work otherwise
-chmod +x train.sh
+video_summarisation_git/data/
+|
+|-- category.txt ...................... # video category name to id mapping file
+|
+|-- test/ ............................. # dir for test set                             
+|   |-- test_videodatainfo.json ....... # annotation file
+|   `-- videos/ ....................... # parent dir for videos (each video should have its own folder inside this dir)
+|
+`-- train_val/ ........................ # dir for training & validation sets
+    |-- random_frames/ ................ # auto-generated: dir for randonmly sampled frames
+    |-- train_val_videodatainfo.json .. # annotation file
+    |-- transnet_frames/ .............. # auto-generated: dir for transnet sampled frames
+    `-- videos/ ....................... # parent dir for videos (each video should have its own folder inside this dir)
 ```
-2. run the fine tuning command
+
+### 2.  Sample Frames
+
+#### You can download SOME of the presampled frames here
+* https://storage.googleapis.com/mlpgit/data/train_val/random_frames.zip
+* https://storage.googleapis.com/mlpgit/data/train_val/transnet_frames.zip
+
+#### Or generate them yourself with a quick script
+
 ```
-./train.sh
+./setup_data.sh train # sample frames for training data
+./setup_data.sh test # same for test
+```
+
+#### To do it fully by hand:
+
+for each sampling method:
+create dataset of frames with one of the following:
+    python sampling_scripts/random_frame_sampling.py -data_dir "${VIDEO_DIR}"
+    python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"
+
+### 3.  Create training csv
+
+```
+python command_builder/training_command.py -d data/train_val/random_frames/ -c data/train_val/train_val_videodatainfo.json
+# or
+python command_builder/training_command.py -d data/train_val/transnet_frames/ -c data/train_val/train_val_videodatainfo.json
+# or
+python command_builder/training_command.py -d data/train_val/pyscenedetect_frames/ -c data/train_val/train_val_videodatainfo.json
+```
+
+### 4.  Finetune Model
+Do this for *ONE* selected sampling method using the following.
+
+Alternatively you can call `./runner.sh` which should have everything you need,
+and will be representative of the *last data* you called the training command builder on
+
+```
+python -m generativeimage2text.finetune -p '{
+    "type": "train",
+    "model_name": "GIT_BASE",
+    "batch_size": 3,
+    "epochs": 2, ##############<----- 50?
+    "train_csv": "data/train_val/{FRAME DIRECTORY HERE}/processed_data_train.csv", # Be sure to swap out {FRAME DIRECTORY HERE} for the directory where your frames are
+    "validation_csv": "data/train_val/{FRAME DIRECTORY HERE}/processed_data_validate.csv"
+}
+``` 
+### 5.  Run Inference
+on test set:
+
+```
+python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference', 'videos_csv': '', 'annotations_json_path': '', 'model_path':'./msrvtt_model_epoch1.pt', 'model_name':'GIT_BASE'}"
 ```
 
 ## FAQ
-
-- errors about "libcublasLt.so.11 not defined in file libcublasLt.so.11" \
-  See this [stackoverflow post](https://stackoverflow.com/questions/74394695/how-does-one-fix-when-torch-cant-find-cuda-error-version-libcublaslt-so-11-no). It got the error to go away, but I'm still having cuda issues so I may need to tinker with this more
 
 - errors about cv2, pandas, numpy, etc.\
   make sure you've installed the second requirements file as described above

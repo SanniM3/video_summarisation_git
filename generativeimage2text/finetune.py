@@ -269,7 +269,7 @@ def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0
         #minibatch training on training_set
         for video_files_batch, prefix_batch, captions_batch in zip(video_file_batches, prefix_batches, caption_batches):
             # print(len(video_files_batch))
-            print('epoch {} batch {}'.format(str(epoch), str(i)))
+            print('epoch {} batch {}/{}'.format(str(epoch), str(i), len(video_file_batches)))
 
             #transform minibatch data
             batch_data = []

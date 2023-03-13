@@ -3,6 +3,10 @@ case "${1}" in
         DATA_DIR='data/train_val'
         JSON_PARTIAL='train_val_videodatainfo.json'
         ;;
+    "test")
+        DATA_DIR='data/test'
+        JSON_PARTIAL='test_videodatainfo.json'
+        ;;
     *)
         echo "Please specify the data set you want to use: {train, test, sample}."
         echo "assuming: sample"
@@ -14,6 +18,8 @@ esac
 VIDEO_DIR="${DATA_DIR}/videos"
 JSON="${DATA_DIR}/${JSON_PARTIAL}"
 
+echo "sampling frames from dir: '${VIDEO_DIR}' and annotations: '${JSON}'"
+
 echo "===================================="
 echo "Creating random frame samples"
 echo "===================================="
@@ -24,4 +30,8 @@ echo "Creating transnet frame samples"
 echo "===================================="
 python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"
 
-#python command_builder/build_training_command.py -d data_subset/random_frames/ -c data_subset/train_val_videodatainfo.json
+echo "===================================="
+echo "Creating transnet frame samples"
+echo "===================================="
+python sampling_scripts/pyscenedetect_sampling.py -data_dir "${VIDEO_DIR}" -data_json "${JSON}"
+
