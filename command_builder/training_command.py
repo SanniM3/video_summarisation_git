@@ -194,7 +194,7 @@ params = json.dumps({
     "validation_csv": csv_files['validate']
 })
 
-command = f"{base_command} '{params}\n'"
+command = f"{base_command} '{params}'\n"
 
 # write command to .sh file
 with open('runner.sh', 'w') as f:
