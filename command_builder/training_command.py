@@ -47,11 +47,9 @@ args.add_argument(
 
 args.add_argument(
     "-m", "--model",
-    default="GIT_BASE_VATEX",
+    default="GIT_BASE",
     help="""The name of the model to fine tune.
-            Default is GIT_BASE_VATEX. NOTE: Other values may not work
-            since pretraining script assumes vatex.
-            We may want to consider GIT_BASE_MSRVTT_QA
+            Default is GIT_BASE.
             """
 )
 
