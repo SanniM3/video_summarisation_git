@@ -30,4 +30,8 @@ echo "Creating transnet frame samples"
 echo "===================================="
 python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"
 
-#python command_builder/build_training_command.py -d data_subset/random_frames/ -c data_subset/train_val_videodatainfo.json
+echo "===================================="
+echo "Creating transnet frame samples"
+echo "===================================="
+python sampling_scripts/pyscenedetect_sampling.py -data_dir "${VIDEO_DIR}" -data_json "${JSON}"
+
