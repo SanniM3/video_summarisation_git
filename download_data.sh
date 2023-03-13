@@ -1,6 +1,12 @@
+echo "Please call this from the root directory of the project"
+echo "Continue? (y/n)"
+read ans
+if [[ "${ans}" != 'y' ]]
+    then exit 1
+fi
+
 tmp=$(mktemp -d -p "$(pwd)" tmp_downloads_XXX)
 cd "${tmp}"
-
 echo "Downloading datasets to directory ${tmp}"
 
 
