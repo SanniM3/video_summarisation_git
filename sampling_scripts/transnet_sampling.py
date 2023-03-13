@@ -19,7 +19,7 @@ par.add_argument("-data_json", type=str, default="/Users/ilakyaprabhakar/Documen
 args = par.parse_args()
 
 # create directory to save frames
-save_path = os.path.split(args.data_dir)[0]
+save_path = pathlib.Path(args.data_dir).parent
 frames_file = os.path.join(save_path, 'transnet_frames')
 pathlib.Path(frames_file).mkdir(parents=True, exist_ok=True)
 

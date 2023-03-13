@@ -357,5 +357,7 @@ build/
 output/
 
 .venv/
-data_subset/random_frames
-data_subset/videos/
+data_subset/*_frames/
+data/train_val/*_frames/
+data/train_val/videos/
+

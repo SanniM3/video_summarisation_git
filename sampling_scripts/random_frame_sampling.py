@@ -11,7 +11,7 @@ args.add_argument("-data_dir", type=str,
                   help="Path to directory containing videos")
 args = args.parse_args()
 
-save_path = os.path.split(args.data_dir)[0]
+save_path = pathlib.Path(args.data_dir).parent
 frames_file = os.path.join(save_path, 'random_frames')
 pathlib.Path(frames_file).mkdir(parents=True, exist_ok=True)
 

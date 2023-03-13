@@ -168,9 +168,11 @@ if args.filter:
 
 splits = data['split'].unique()
 logging.debug(f"creating csv files for data splits: '{splits}'")
+csv_files = {}
 for split in splits:
     cur_split = data[ data['split'] == split ]
     csv_out = f'processed_data_{split}.csv'
+    csv_files[split] = csv_out
     cur_split.to_csv(csv_out)
     logging.debug(f"  creating '{csv_out}': {'SUCCESS' if os.path.isfile(csv_out) else 'FAIL'}")
 
@@ -193,14 +195,13 @@ params = json.dumps({
     'type': 'train',
     'model_name': args.model,
     'batch_size': args.batch_size,
-    'epochs': args.epochs
+    'epochs': args.epochs,
+    "train_csv": csv_files['train'],
+    "validation_csv": csv_files['validate']
 })
 
-command = f"{base_command} '{params}'"
+command = f"{base_command} '{params}\n'"
 
 # write command to .sh file
 with open('runner.sh', 'w') as f:
     f.write(command)
-
-
-#python ./video_summarisation_git/command_builder/build_training_command.py -d ./video_summarisation_git/random_train_frames/ -c ./train_val_videodatainfo.json -m GIT_BASE_VATEX -e 2 -b 128 -o processed_data.csv
