@@ -58,10 +58,13 @@ create dataset of frames with one of the following:
 ### 3.  Create training csv
 
 ```
+# for random frames
 python command_builder/training_command.py -d data/train_val/random_frames/ -c data/train_val/train_val_videodatainfo.json
-# or
+
+# or for transnet frames
 python command_builder/training_command.py -d data/train_val/transnet_frames/ -c data/train_val/train_val_videodatainfo.json
-# or
+
+# or for pyscenedetect frames
 python command_builder/training_command.py -d data/train_val/pyscenedetect_frames/ -c data/train_val/train_val_videodatainfo.json
 ```
 
