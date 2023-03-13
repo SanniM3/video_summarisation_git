@@ -164,6 +164,15 @@ def get_batches(full_list, batch_size):
         batches.append(full_list[i*batch_size : (i+1)*batch_size])
     return batches
 
+def write_loss(loss, loss_type):
+    if loss_type == 'validation':
+        filename = 'val_losses.csv'
+    elif loss_type == 'train':
+        filename = 'train_losses.csv'
+
+        with open(filename, 'a') as f:
+            f.write(str(loss) + '\n')
+
 def get_val_loss(validation_csv, model, tokenizer, param):
     model.eval()
     model.validation = True #model attribute to calculate loss
@@ -213,7 +222,7 @@ def get_val_loss(validation_csv, model, tokenizer, param):
     avg_loss = running_loss/len(video_files)
     return avg_loss
 
-def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0.0001, prefixes=None):
+def train(train_csv, validation_csv, model_name, model_path, batch_size, epochs, threshold=0.0001, prefixes=None):
     vid_caption_df = pd.read_csv(train_csv)
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
@@ -233,7 +242,7 @@ def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0
    
     # model
     model = get_git_model(tokenizer, param)
-    pretrained = 'model.pt'
+    pretrained = model_path
     checkpoint = torch_load(pretrained)['model']
     load_state_dict(model, checkpoint)
     print('base model setup succesful!')
@@ -297,11 +306,13 @@ def train(train_csv, validation_csv, model_name, batch_size, epochs, threshold=0
         
         avg_train_loss = running_loss / len(video_files)
         train_losses.append(avg_train_loss)
+        write_loss(avg_train_loss.item(), 'train')
         # running_loss = 0.0
         
         ### evaluation on validation dataset
         avg_val_loss = get_val_loss(validation_csv, model, tokenizer, param)
         val_losses.append(avg_val_loss)
+        write_loss(avg_val_loss.item(), 'validation')
         print('epoch {}, avg_train_loss: {}, avg_val_loss: {}'.format(str(epoch+1), avg_train_loss, avg_val_loss))
         if torch.abs(avg_val_loss - best_val_loss) < threshold:
             #saved model name for this epoch
