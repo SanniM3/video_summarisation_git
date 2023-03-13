@@ -35,27 +35,40 @@ video_summarisation_git/data/
 ```
 
 ### 2.  Sample Frames
+
+#### You can download SOME of the presampled frames here
+* https://storage.googleapis.com/mlpgit/data/train_val/random_frames.zip
+* https://storage.googleapis.com/mlpgit/data/train_val/transnet_frames.zip
+
+#### Or generate them yourself with a quick script
+
+```
+./setup_data.sh train # sample frames for training data
+./setup_data.sh test # same for test
+```
+
+#### To do it fully by hand:
+
 for each sampling method:
 create dataset of frames with one of the following:
     python sampling_scripts/random_frame_sampling.py -data_dir "${VIDEO_DIR}"
     python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"
 
-***the above can be automated by calling `/setup_data.sh train`***
-
-***--> ALTERNATIVELY YOU CAN DOWNLOAD PRESAMPLED FRAMES HERE:***
-* https://storage.googleapis.com/mlpgit/data/train_val/random_frames.zip
-* https://storage.googleapis.com/mlpgit/data/train_val/transnet_frames.zip
-
 ### 3.  Create training csv
+
 ```
 python command_builder/training_command.py -d data/train_val/random_frames/ -c data/train_val/train_val_videodatainfo.json
 # or
 python command_builder/training_command.py -d data/train_val/transnet_frames/ -c data/train_val/train_val_videodatainfo.json
-
+# or
+python command_builder/training_command.py -d data/train_val/pyscenedetect_frames/ -c data/train_val/train_val_videodatainfo.json
 ```
 
 ### 4.  Finetune Model
-Do this for *ONE* selected sampling method using the following. Alternatively you can call `./runner.sh` which shoud have everything you need, and will be representative of the last data you called the training command builder on
+Do this for *ONE* selected sampling method using the following.
+
+Alternatively you can call `./runner.sh` which should have everything you need,
+and will be representative of the *last data* you called the training command builder on
 
 ```
 python -m generativeimage2text.finetune -p '{
@@ -63,8 +76,8 @@ python -m generativeimage2text.finetune -p '{
     "model_name": "GIT_BASE",
     "batch_size": 3,
     "epochs": 2, ##############<----- 50?
-    "train_csv": "data/train_val/random_frames/processed_data_train.csv", # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
-    "validation_csv": "data/train_val/random_frames/processed_data_validate.csv" # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
+    "train_csv": "data/train_val/{FRAME DIRECTORY HERE}/processed_data_train.csv", # Be sure to swap out {FRAME DIRECTORY HERE} for the directory where your frames are
+    "validation_csv": "data/train_val/{FRAME DIRECTORY HERE}/processed_data_validate.csv"
 }
 ``` 
 ### 5.  Run Inference
