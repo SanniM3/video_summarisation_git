@@ -360,4 +360,5 @@ output/
 data_subset/*_frames/
 data/train_val/*_frames/
 data/train_val/videos/
-
+data/test/*_frames/
+data/test/videos/

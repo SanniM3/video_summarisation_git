@@ -12,21 +12,59 @@ pip install -r requirements_2.txt
 ./get_pretrained_vatex.sh
 ```
 
-## Get things going
-1. sample videos \& create fine tuning command
+## General Workflow:
+
+### 1.  Download Data
+Suggested directory structure:
+
 ```
-./setup_data.sh # assumes .venv is your virtual environment. may not work otherwise
-chmod +x train.sh
+video_summarisation_git/data/
+|
+|-- category.txt ...................... # video category name to id mapping file
+|
+|-- test/ ............................. # dir for test set                             
+|   |-- test_videodatainfo.json ....... # annotation file
+|   `-- videos/ ....................... # parent dir for videos (each video should have its own folder inside this dir)
+|
+`-- train_val/ ........................ # dir for training & validation sets
+    |-- random_frames/ ................ # auto-generated: dir for randonmly sampled frames
+    |-- train_val_videodatainfo.json .. # annotation file
+    |-- transnet_frames/ .............. # auto-generated: dir for transnet sampled frames
+    `-- videos/ ....................... # parent dir for videos (each video should have its own folder inside this dir)
 ```
-2. run the fine tuning command
+
+### 2.  Sample Frames
+for each sampling method:
+create dataset of frames with one of the following:
+    python sampling_scripts/random_frame_sampling.py -data_dir "${VIDEO_DIR}"
+    python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"
+
+***the above can be automated by calling `/setup_data.sh train`***
+
+***--> ALTERNATIVELY YOU CAN DOWNLOAD PRESAMPLED FRAMES HERE:***
+* https://storage.googleapis.com/mlpgit/data/train_val/random_frames.zip
+* https://storage.googleapis.com/mlpgit/data/train_val/transnet_frames.zip
+
+### 3.  Finetune Model
+Do this for *ONE* selected sampling method using the following
 ```
-./train.sh
+python -m generativeimage2text.finetune -p '{
+    "type": "train",
+    "model_name": "GIT_BASE_VATEX",
+    "batch_size": 3,
+    "epochs": 2, ##############<----- 50?
+    "train_csv": "processed_data_train.csv", # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
+    "validation_csv": "processed_data_validate.csv" # TODO THESE WILL CHANGE BASED ON THE SAMPLING METHOD
+}
+``` 
+### 4.  Run Inference
+on test set:
+
+```
+python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference', 'videos_csv': '', 'annotations_json_path': '', 'model_path':'./msrvtt_model_epoch1.pt', 'model_name':'GIT_BASE'}"
 ```
 
 ## FAQ
-
-- errors about "libcublasLt.so.11 not defined in file libcublasLt.so.11" \
-  See this [stackoverflow post](https://stackoverflow.com/questions/74394695/how-does-one-fix-when-torch-cant-find-cuda-error-version-libcublaslt-so-11-no). It got the error to go away, but I'm still having cuda issues so I may need to tinker with this more
 
 - errors about cv2, pandas, numpy, etc.\
   make sure you've installed the second requirements file as described above
