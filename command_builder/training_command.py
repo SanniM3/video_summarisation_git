@@ -191,6 +191,7 @@ params = json.dumps({
     'batch_size': args.batch_size,
     'epochs': args.epochs,
     "train_csv": csv_files['train'],
+    'model_path': 'model.pt', 
     "validation_csv": csv_files['validate']
 })
 
