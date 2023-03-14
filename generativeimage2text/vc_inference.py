@@ -1,5 +1,6 @@
 from .common import Config
 import json
+import re
 import pandas as pd
 from ast import literal_eval
 import os.path as op
@@ -155,6 +156,8 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
     video_files_df = pd.read_csv(videos_csv)
     video_files = list(video_files_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
+    
+    
     epoch_number = re.search(r'(epoch\d+)',model_path)
     if epoch_number is not None:
         epoch_number = epoch_number.group()
@@ -232,6 +235,98 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
         metrics.append({'Metric Name':metric, 'Metric Value':score}, ignore_index=True)
     
     metrics.to_csv(metrics_file, index=False)
+
+def multi_video_inference_dir(videos_csv, annotations_json_path, model_dir, model_name, prefixes=None):
+    
+    """
+    annotations_json_path: path to json containing original video annotataions
+    """
+    #create directory fore prediction and metrics in model_dir
+    os.mkdir(os.path.join(model_dir, 'predictions'))                 
+    
+    video_files_df = pd.read_csv(videos_csv)
+    video_files = list(video_files_df['image_files'])
+    video_files = [literal_eval(i) for i in video_files]
+    
+    for model_path in os.listdir(model_dir):
+        
+        epoch_number = re.search(r'(epoch\d+)',model_path)
+        if epoch_number is not None:
+            epoch_number = epoch_number.group()
+
+        predictions_file = os.path.join(model_dir, 'predictions', "predictions_{}.json".format(str(epoch_number)))
+        metrics_file = os.path.join(model_dir, 'predictions', "metrics_{}.csv".format(str(epoch_number)))
+
+        if prefixes is None:
+            prefixes = ['']*len(video_files)
+        param = {}
+        if File.isfile(f'aux_data/models/{model_name}/parameter.yaml'):
+            param = load_from_yaml_file(f'aux_data/models/{model_name}/parameter.yaml')
+
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+        
+        # model
+        model = get_git_model(tokenizer, param)
+        # pretrained = f'output/{model_name}/snapshot/model.pt'
+        pretrained = model_path
+        # checkpoint = torch_load(pretrained)['model']
+        # load_state_dict(model, checkpoint)
+        model.load_state_dict(torch.load(pretrained))
+        model.cuda()
+        model.eval()
+
+        vid_to_caption = {"videos": [], "sentences": []}
+        for video_file, prefix in zip(video_files, prefixes):
+            img = [load_image_by_pil(i) for i in video_file]
+
+            transforms = get_image_transform(param)
+            img = [transforms(i) for i in img]
+
+            
+            img = [i.unsqueeze(0).cuda() for i in img]
+
+            # prefix
+            max_text_len = 40
+            prefix_encoding = tokenizer(prefix,
+                                        padding='do_not_pad',
+                                        truncation=True,
+                                        add_special_tokens=False,
+                                        max_length=max_text_len)
+            payload = prefix_encoding['input_ids']
+            if len(payload) > max_text_len - 2:
+                payload = payload[-(max_text_len - 2):]
+            input_ids = [tokenizer.cls_token_id] + payload
+
+            with torch.no_grad():
+                result = model({
+                    'image': img,
+                    'prefix': torch.tensor(input_ids).unsqueeze(0).cuda(),
+                })
+            cap = tokenizer.decode(result['predictions'][0].tolist(), skip_special_tokens=True)
+            logging.info('output: {}'.format(cap))
+            
+            video_file_name = op.split(video_file[0])[-1].split('_')[0]
+            
+            vid_to_caption["videos"].append({'video_id': video_file_name})
+            vid_to_caption["sentences"].append({'video_id': video_file_name,
+                                                'caption': cap})
+        
+        # write dictionary to json
+        
+        with open(os.path.join(os.getcwd(),predictions_file), "w") as f:
+            json.dump(vid_to_caption, f)
+
+        # evaluate metrics
+        metrics_obj = EvalCap(os.path.join(os.getcwd(),"predictions.json"),
+                            annotations_json_path)
+        metrics_obj.evaluate()
+        
+        # save metrics
+        metrics = pd.DataFrame(data={'Metric Name':[], 'Metric Value':[]})
+        for metric, score in metrics_obj.eval.items():
+            metrics.append({'Metric Name':metric, 'Metric Value':score}, ignore_index=True)
+        
+        metrics.to_csv(metrics_file, index=False)
 
 if __name__ == '__main__':
     init_logging()
