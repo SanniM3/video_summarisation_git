@@ -155,6 +155,12 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
     video_files_df = pd.read_csv(videos_csv)
     video_files = list(video_files_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
+    epoch_number = re.search(r'(epoch\d+)',model_path)
+    if epoch_number is not None:
+        epoch_number = epoch_number.group()
+
+    predictions_file = "predictions_{}.json".format(str(epoch_number))
+    metrics_file = "metrics_{}.csv".format(str(epoch_number))
 
     if prefixes is None:
         prefixes = ['']*len(video_files)
@@ -211,7 +217,8 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
                                             'caption': cap})
     
     # write dictionary to json
-    with open(os.path.join(os.getcwd(),"predictions.json"), "w") as f:
+    
+    with open(os.path.join(os.getcwd(),predictions_file), "w") as f:
         json.dump(vid_to_caption, f)
 
     # evaluate metrics
@@ -224,7 +231,7 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
     for metric, score in metrics_obj.eval.items():
         metrics.append({'Metric Name':metric, 'Metric Value':score}, ignore_index=True)
     
-    metrics.to_csv('metrics.csv', index=False)
+    metrics.to_csv(metrics_file, index=False)
 
 if __name__ == '__main__':
     init_logging()
