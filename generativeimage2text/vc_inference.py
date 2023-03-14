@@ -228,7 +228,7 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
         json.dump(vid_to_caption, f)
 
     # evaluate metrics
-    metrics_obj = EvalCap(os.path.join(os.getcwd(),"predictions.json"),
+    metrics_obj = EvalCap(os.path.join(os.getcwd(),predictions_file),
                           annotations_json_path)
     metrics_obj.evaluate()
     
