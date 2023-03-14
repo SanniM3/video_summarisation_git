@@ -11,6 +11,10 @@ pip install -r requirements_2.txt
 ```
 ./get_pretrained_model.sh
 ```
+3. Install java 
+```
+sudo apt install default-jdk
+```
 
 ## General Workflow:
 
