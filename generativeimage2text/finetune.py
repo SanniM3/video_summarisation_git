@@ -37,6 +37,7 @@ from .data_layer.transform import ImageTransform2Dict
 from .data_layer.transform import get_inception_train_transform
 from .data_layer.builder import collate_fn
 from .model import get_git_model
+from .vc_inference import multi_video_inference
 
 def get_data(video_file, prefix, target, tokenizer, param):
     max_text_len = 40
@@ -223,7 +224,8 @@ def get_val_loss(validation_csv, model, tokenizer, param):
     avg_loss = running_loss/len(video_files)
     return avg_loss
 
-def train(train_csv, validation_csv, model_name, model_path, batch_size, epochs, threshold=0.0001, prefixes=None):
+
+def train(train_csv, validation_csv, validation_annotations_json, model_name, model_path, batch_size, epochs, threshold=0.0001, prefixes=None):
 
     epoch_number = re.search(r'(\d+)',model_path)
     if epoch_number is None:
@@ -322,32 +324,42 @@ def train(train_csv, validation_csv, model_name, model_path, batch_size, epochs,
         # running_loss = 0.0
         
         ### evaluation on validation dataset
-        avg_val_loss = get_val_loss(validation_csv, model, tokenizer, param)
-        val_losses.append(avg_val_loss)
-        write_loss(avg_val_loss.item(), 'validation')
-        print('epoch {}, avg_train_loss: {}, avg_val_loss: {}'.format(str(epoch+1), avg_train_loss, avg_val_loss))
-        if torch.abs(avg_val_loss - best_val_loss) < threshold:
-            #saved model name for this epoch
-            saved_model_name = 'best_msrvtt_model_epoch{}.pt'.format(str(epoch))
-            #save model parameters
-            torch.save(model.state_dict(), saved_model_name)
-            break
+        # avg_val_loss = get_val_loss(validation_csv, model, tokenizer, param)
+        # val_losses.append(avg_val_loss)
+        # write_loss(avg_val_loss.item(), 'validation')
 
-        if avg_val_loss < best_val_loss:
-            best_val_loss = avg_val_loss
-            #saved model name for this epoch
-            saved_model_name = 'better_msrvtt_model_epoch{}.pt'.format(str(epoch))
-            #save model parameters
-            torch.save(model.state_dict(), saved_model_name)  
-        #for epochs that did not improve in terms of validation loss  
-        else:            
-            #saved model name for this epoch
-            saved_model_name = 'regular_msrvtt_model_epoch{}.pt'.format(str(epoch))
-            #save model parameters
-            torch.save(model.state_dict(), saved_model_name)        
+        
+        # print('epoch {}, avg_train_loss: {}, avg_val_loss: {}'.format(str(epoch+1), avg_train_loss, avg_val_loss))
+        # if torch.abs(avg_val_loss - best_val_loss) < threshold:
+        #     #saved model name for this epoch
+        #     saved_model_name = 'best_msrvtt_model_epoch{}.pt'.format(str(epoch))
+        #     #save model parameters
+        #     torch.save(model.state_dict(), saved_model_name)
+        #     break
+
+        # if avg_val_loss < best_val_loss:
+        #     best_val_loss = avg_val_loss
+        #     #saved model name for this epoch
+        #     saved_model_name = 'better_msrvtt_model_epoch{}.pt'.format(str(epoch))
+        #     #save model parameters
+        #     torch.save(model.state_dict(), saved_model_name)  
+        # #for epochs that did not improve in terms of validation loss  
+        # else:            
+        #     #saved model name for this epoch
+        #     saved_model_name = 'regular_msrvtt_model_epoch{}.pt'.format(str(epoch))
+        #     #save model parameters
+        #     torch.save(model.state_dict(), saved_model_name) 
+        # 
+        #saved model epoch
+        saved_model_name = 'regular_msrvtt_model_epoch{}.pt'.format(str(epoch))
+        #save model parameters
+        torch.save(model.state_dict(), saved_model_name)
+
+        #save evaluation metrics on validation set
+        multi_video_inference(validation_csv, validation_annotations_json, saved_model_name, model_name)  
         
     print('Average training losses over all epochs: {}'.format(str(train_losses)))    
-    print('Average validation losses over all epochs: {}'.format(str(val_losses)))   
+    # print('Average validation losses over all epochs: {}'.format(str(val_losses)))   
     
     
              
