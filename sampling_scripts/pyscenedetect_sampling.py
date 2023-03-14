@@ -7,6 +7,7 @@ import json
 import cv2
 import numpy as  np
 import pandas as pd
+import random
 
 args = argparse.ArgumentParser()
 args.add_argument("-data_dir", type=str,
@@ -61,27 +62,28 @@ for video in tqdm(os.listdir(args.data_dir)):
                 scenes = detect(os.path.join(args.data_dir, video), ContentDetector())
             
             if len(scenes) <= 1:
-                print('File {} skipped as only one scene found'.format(video_name))
+                print('File {} is now randomly sampled, as only one scene found'.format(video_name))
                 stats['num_scenes'].append(1)
-                continue
-            
-            scene_list = []
-
-            for i, scene in enumerate(scenes):
-                scene_list.append([scene[0].get_frames()+1, scene[1].get_frames()])
-
-            stats['num_scenes'].append(len(scene_list))
-            
-            frame_numbers = np.zeros(6)
-            
-            # sample 1 frame randomly from each scene until 6 frames are found
-            n = 0
-            while n < 6:
-                for s in scenes:
-                    frame_numbers[n] = np.random.randint(s[0], s[1]+1)
-                    n+=1 
-                    if n == 6:
-                        break
+                frame_numbers = sorted(random.sample(range(0, total_frames), 6))
+    
+            else:
+                scene_list = []
+    
+                for i, scene in enumerate(scenes):
+                    scene_list.append([scene[0].get_frames()+1, scene[1].get_frames()])
+    
+                stats['num_scenes'].append(len(scene_list))
+                
+                frame_numbers = np.zeros(6)
+                
+                # sample 1 frame randomly from each scene until 6 frames are found
+                n = 0
+                while n < 6:
+                    for s in scenes:
+                        frame_numbers[n] = np.random.randint(s[0], s[1]+1)
+                        n+=1 
+                        if n == 6:
+                            break
 
             # save frames
             n = 0
