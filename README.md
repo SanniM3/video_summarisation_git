@@ -82,7 +82,8 @@ python -m generativeimage2text.finetune -p '{
     "batch_size": 3,
     "epochs": 2, ##############<----- 50?
     "train_csv": "data/train_val/{FRAME DIRECTORY HERE}/processed_data_train.csv", # Be sure to swap out {FRAME DIRECTORY HERE} for the directory where your frames are
-    "validation_csv": "data/train_val/{FRAME DIRECTORY HERE}/processed_data_validate.csv"
+    "validation_csv": "data/train_val/{FRAME DIRECTORY HERE}/processed_data_validate.csv",
+    "validation_annotations_json": "data/train_val/train_val_videodatainfo.json" #path to annotations file
 }
 ``` 
 ### 5.  Run Inference
