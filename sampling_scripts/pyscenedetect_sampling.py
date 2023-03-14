@@ -95,7 +95,7 @@ for video in tqdm(os.listdir(args.data_dir)):
                     n+=1
         except:
             print('File {} skipped, potentially corrupted.'.format(video_name))
-            pass
+            continue
                 
 df = pd.DataFrame(stats)
 df.to_csv(os.path.join(frames_file, 'stats.csv') , index=False)
