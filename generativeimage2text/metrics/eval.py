@@ -67,6 +67,8 @@ class EvalCap:
         tokenizer = PTBTokenizer()
         gts  = tokenizer.tokenize(gts)
         res = tokenizer.tokenize(res)
+        print('gts keys: ', gts.keys())
+        print('res keys: ', res.keys())
 
         # =================================================
         # Set up scorers
