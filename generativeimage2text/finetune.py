@@ -223,6 +223,13 @@ def get_val_loss(validation_csv, model, tokenizer, param):
     return avg_loss
 
 def train(train_csv, validation_csv, model_name, model_path, batch_size, epochs, threshold=0.0001, prefixes=None):
+
+    epoch_number = re.search(r'(\d+)',model_path)
+    if epoch_number is None:
+        epoch_number = -1
+    else:
+        epoch_number = int(epoch_number.group())
+
     vid_caption_df = pd.read_csv(train_csv)
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
@@ -257,6 +264,9 @@ def train(train_csv, validation_csv, model_name, model_path, batch_size, epochs,
     best_val_loss = 1000000.
 
     for epoch in range(epochs):
+        if epoch <= epoch_number:
+            continue
+        
         print('epoch ', str(epoch+1))
         model.train(True)
         #shuffle training data for current epoch
