@@ -158,13 +158,6 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
     video_files = [literal_eval(i) for i in video_files]
     
     
-    epoch_number = re.search(r'(epoch\d+)',model_path)
-    if epoch_number is not None:
-        epoch_number = epoch_number.group()
-
-    predictions_file = "predictions_{}.json".format(str(epoch_number))
-    metrics_file = "metrics_{}.csv".format(str(epoch_number))
-
     if prefixes is None:
         prefixes = ['']*len(video_files)
     param = {}
@@ -177,9 +170,19 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
     model = get_git_model(tokenizer, param)
     # pretrained = f'output/{model_name}/snapshot/model.pt'
     pretrained = model_path
-    # checkpoint = torch_load(pretrained)['model']
-    # load_state_dict(model, checkpoint)
-    model.load_state_dict(torch.load(pretrained))
+
+    epoch_number = re.search(r'(epoch\d+)',model_path)
+    if epoch_number is None: #inference from base model
+        checkpoint = torch_load(pretrained)['model']
+        load_state_dict(model, checkpoint)        
+    else: #inference from our (MLP) model
+        epoch_number = epoch_number.group()
+        model.load_state_dict(torch.load(pretrained))
+
+    predictions_file = "predictions_{}.json".format(str(epoch_number))
+    metrics_file = "metrics_{}.csv".format(str(epoch_number))
+    
+    
     model.cuda()
     model.eval()
 
@@ -250,13 +253,6 @@ def multi_video_inference_dir(videos_csv, annotations_json_path, model_dir, mode
     
     for model_path in os.listdir(model_dir):
         
-        epoch_number = re.search(r'(epoch\d+)',model_path)
-        if epoch_number is not None:
-            epoch_number = epoch_number.group()
-
-        predictions_file = os.path.join(model_dir, 'predictions', "predictions_{}.json".format(str(epoch_number)))
-        metrics_file = os.path.join(model_dir, 'predictions', "metrics_{}.csv".format(str(epoch_number)))
-
         if prefixes is None:
             prefixes = ['']*len(video_files)
         param = {}
@@ -269,9 +265,20 @@ def multi_video_inference_dir(videos_csv, annotations_json_path, model_dir, mode
         model = get_git_model(tokenizer, param)
         # pretrained = f'output/{model_name}/snapshot/model.pt'
         pretrained = model_path
+        epoch_number = re.search(r'(epoch\d+)',model_path)
+        if epoch_number is None: #inference from base model
+            checkpoint = torch_load(pretrained)['model']
+            load_state_dict(model, checkpoint)        
+        else: #inference from our (MLP) model
+            epoch_number = epoch_number.group()
+            model.load_state_dict(torch.load(pretrained))
+
+        predictions_file = os.path.join(model_dir, 'predictions', "predictions_{}.json".format(str(epoch_number)))
+        metrics_file = os.path.join(model_dir, 'predictions', "metrics_{}.csv".format(str(epoch_number)))
+
         # checkpoint = torch_load(pretrained)['model']
         # load_state_dict(model, checkpoint)
-        model.load_state_dict(torch.load(pretrained))
+        # model.load_state_dict(torch.load(pretrained))
         model.cuda()
         model.eval()
 

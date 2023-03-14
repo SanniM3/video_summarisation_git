@@ -227,12 +227,6 @@ def get_val_loss(validation_csv, model, tokenizer, param):
 
 def train(train_csv, validation_csv, validation_annotations_json, model_name, model_path, batch_size, epochs, threshold=0.0001, prefixes=None):
 
-    epoch_number = re.search(r'(\d+)',model_path)
-    if epoch_number is None:
-        epoch_number = -1
-    else:
-        epoch_number = int(epoch_number.group())
-
     vid_caption_df = pd.read_csv(train_csv)
     video_files = list(vid_caption_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
@@ -241,7 +235,6 @@ def train(train_csv, validation_csv, validation_annotations_json, model_name, mo
     # print(len(video_files))
     if prefixes is None:
         prefixes = [''] * len(captions)
-
     
     param = {}
 
@@ -253,9 +246,16 @@ def train(train_csv, validation_csv, validation_annotations_json, model_name, mo
     # model
     model = get_git_model(tokenizer, param)
     pretrained = model_path
-    # checkpoint = torch_load(pretrained)['model']
-    model.load_state_dict(torch.load(pretrained))
-    # load_state_dict(model, checkpoint)
+    epoch_number = re.search(r'(\d+)',model_path)
+    if epoch_number is None: #starting training from base model
+        epoch_number = -1
+        checkpoint = torch_load(pretrained)['model']
+        load_state_dict(model, checkpoint)
+    else: #starting from our(MLP) saved model
+        epoch_number = int(epoch_number.group())
+        model.load_state_dict(torch.load(pretrained))   
+    
+    
     print('base model setup succesful!')
     model.cuda()
     print('model moved to cuda')
