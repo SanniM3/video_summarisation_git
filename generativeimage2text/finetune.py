@@ -251,8 +251,9 @@ def train(train_csv, validation_csv, model_name, model_path, batch_size, epochs,
     # model
     model = get_git_model(tokenizer, param)
     pretrained = model_path
-    checkpoint = torch_load(pretrained)['model']
-    load_state_dict(model, checkpoint)
+    # checkpoint = torch_load(pretrained)['model']
+    model.load_state_dict(torch.load(pretrained))
+    # load_state_dict(model, checkpoint)
     print('base model setup succesful!')
     model.cuda()
     print('model moved to cuda')
