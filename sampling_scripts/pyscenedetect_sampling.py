@@ -61,7 +61,8 @@ for video in tqdm(os.listdir(args.data_dir)):
                 scenes = detect(os.path.join(args.data_dir, video), ContentDetector())
             
             if len(scenes) <= 1:
-                print('File {} skipped as no scenes found'.format(video_name))
+                print('File {} skipped as only one scene found'.format(video_name))
+                stats['num_scenes'].append(1)
                 continue
             
             scene_list = []
@@ -93,7 +94,7 @@ for video in tqdm(os.listdir(args.data_dir)):
                     cv2.imwrite(os.path.join(video_file, video_name+'_frame{}.jpg'.format(n)), image)
                     n+=1
         except:
-            print('File {} skipped'.format(video_name))
+            print('File {} skipped, potentially corrupted.'.format(video_name))
             pass
                 
 df = pd.DataFrame(stats)
