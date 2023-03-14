@@ -62,7 +62,7 @@ for video in tqdm(os.listdir(args.data_dir)):
             
             if len(scenes) <= 1:
                 print('File {} skipped as no scenes found'.format(video_name))
-                pass
+                continue
             
             scene_list = []
 
