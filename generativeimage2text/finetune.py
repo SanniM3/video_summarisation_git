@@ -356,7 +356,7 @@ def train(train_csv, validation_csv, validation_annotations_json, model_name, mo
         torch.save(model.state_dict(), saved_model_name)
 
         #save evaluation metrics on validation set
-        multi_video_inference(validation_csv, validation_annotations_json, saved_model_name, model_name)  
+        # multi_video_inference(validation_csv, validation_annotations_json, saved_model_name, model_name)  
         
     print('Average training losses over all epochs: {}'.format(str(train_losses)))    
     # print('Average validation losses over all epochs: {}'.format(str(val_losses)))   
