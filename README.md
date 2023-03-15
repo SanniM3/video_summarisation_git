@@ -93,6 +93,19 @@ python -m generativeimage2text.finetune -p '{
     "validation_annotations_json": "data/train_val/train_val_videodatainfo.json" #path to annotations file
 }
 ``` 
+
+### 4.5 Where to find already fine-tuned models
+
+* pyscenedetect
+  - https://storage.googleapis.com/mlpgit/results/pyscene_models.zip
+  - https://storage.googleapis.com/mlpgit/results/pyscene_losses.zip
+* random frames
+  - (pending)
+  - (pending)
+* transnet
+  - (pending)
+  - (pending)
+
 ### 5.  Run Inference
 on test set:
 
