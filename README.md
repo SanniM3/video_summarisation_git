@@ -9,7 +9,7 @@ pip install -r requirements_2.txt
 ```
 2. Download pretrained model
 ```
-./get_pretrained_model.sh
+./setup_download_model.sh
 ```
 3. Install java 
 ```
@@ -19,7 +19,7 @@ sudo apt install default-jdk
 ## General Workflow:
 
 ### 1.  Download Data
-Calling `./download_data.sh` will do this for you and setup the following
+Calling `./setup_download_data.sh` will do this for you and setup the following
 directory structure
 
 ```
@@ -27,37 +27,37 @@ video_summarisation_git/data/
 |
 |-- category.txt ...................... # video category name to id mapping file
 |
-|-- test/ ............................. # dir for test set                             
-|   |-- test_videodatainfo.json ....... # annotation file
+|-- train_val/ ........................ # dir for training & validation sets
+|   |-- train_val_videodatainfo.json .. # annotation file
+|   |-- pyscenedetect_frames/ ......... # dir for pyscenedetect sampled frames
+|   |-- random_frames/ ................ # auto-generated: dir for randonmly sampled frames
+|   |-- transnet_frames/ .............. # auto-generated: dir for transnet sampled frames
 |   `-- videos/ ....................... # parent dir for videos (each video should have its own folder inside this dir)
 |
-`-- train_val/ ........................ # dir for training & validation sets
-    |-- random_frames/ ................ # auto-generated: dir for randonmly sampled frames
-    |-- train_val_videodatainfo.json .. # annotation file
-    |-- transnet_frames/ .............. # auto-generated: dir for transnet sampled frames
-    `-- videos/ ....................... # parent dir for videos (each video should have its own folder inside this dir)
+`-- test/ ............................. # dir for test set (structure same as train_val)                             
+    |-- test_videodatainfo.json ....... # annotation file
+    `-- [...] 
 ```
 
 ### 2.  Sample Frames
 
-#### You can download SOME of the presampled frames here
-* https://storage.googleapis.com/mlpgit/data/train_val/random_frames.zip
-* https://storage.googleapis.com/mlpgit/data/train_val/transnet_frames.zip
+#### You can download presampled frames here
+Download and unzip them in `/data/train_val` or `/data/train` as appropriate.
 
-#### Or generate them yourself with a quick script
+* https://storage.googleapis.com/mlpgit/data/train_val/train_val.zip
+* https://storage.googleapis.com/mlpgit/data/test/test_frames.zip
+
+
+#### Or generate them yourself with a script (will approx 3hrs w/ a k80)
 
 ```
 ./setup_data.sh train # sample frames for training data
 ./setup_data.sh test # same for test
 ```
 
-#### To do it fully by hand:
+#### Or do it piecemeal by hand:
 
-for each sampling method:\
-create dataset of frames with one of the following:
-
-* `python sampling_scripts/random_frame_sampling.py -data_dir "${VIDEO_DIR}"`
-* `python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"`
+see 
 
 ### 3.  Create training csv
 

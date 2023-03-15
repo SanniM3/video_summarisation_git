@@ -192,7 +192,8 @@ params = json.dumps({
     'epochs': args.epochs,
     "train_csv": csv_files['train'],
     'model_path': 'model.pt', 
-    "validation_csv": csv_files['validate']
+    "validation_csv": csv_files['validate'],
+    "validation_annotations_json": args.captions_file 
 })
 
 command = f"{base_command} '{params}'\n"
