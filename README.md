@@ -51,13 +51,16 @@ Download and unzip them in `/data/train_val` or `/data/train` as appropriate.
 #### Or generate them yourself with a script (will approx 3hrs w/ a k80)
 
 ```
-./setup_data.sh train # sample frames for training data
-./setup_data.sh test # same for test
+./setup_sample_frames.sh train # sample frames for training data
+./setup_sample_frames.sh test # same for test
 ```
 
 #### Or do it piecemeal by hand:
 
-see 
+open `/setup_sample_frames.sh` to get an idea of the commands to run
+for each sampling method.
+
+Alternatively, you can look at the actual samplers in `/sampling_scripts`
 
 ### 3.  Create training csv
 
