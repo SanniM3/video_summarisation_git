@@ -20,18 +20,18 @@ JSON="${DATA_DIR}/${JSON_PARTIAL}"
 
 echo "sampling frames from dir: '${VIDEO_DIR}' and annotations: '${JSON}'"
 
+#echo "===================================="
+#echo "Creating transnet frame samples"
+#echo "===================================="
+#python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"
+
+echo "===================================="
+echo "Creating pyscenedetect frame samples"
+echo "===================================="
+python sampling_scripts/pyscenedetect_sampling.py -data_dir "${VIDEO_DIR}" -data_json "${JSON}"
+
 echo "===================================="
 echo "Creating random frame samples"
 echo "===================================="
 python sampling_scripts/random_frame_sampling.py -data_dir "${VIDEO_DIR}"
-
-echo "===================================="
-echo "Creating transnet frame samples"
-echo "===================================="
-python sampling_scripts/transnet_sampling.py  -data_dir "${VIDEO_DIR}" -model_dir sampling_scripts/TransNetV2/transnetv2-weights/ -data_json "${JSON}"
-
-echo "===================================="
-echo "Creating transnet frame samples"
-echo "===================================="
-python sampling_scripts/pyscenedetect_sampling.py -data_dir "${VIDEO_DIR}" -data_json "${JSON}"
 
