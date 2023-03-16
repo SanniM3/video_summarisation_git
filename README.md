@@ -15,7 +15,11 @@ pip install -r requirements_2.txt
 ```
 sudo apt install default-jdk
 ```
-
+4. GIT model setup
+```
+pip install -r requirements.txt
+python setup.py build develop
+```
 ## General Workflow:
 
 ### 1.  Download Data
