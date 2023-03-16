@@ -84,7 +84,7 @@ python command_builder/training_command.py -d data/train_val/pyscenedetect_frame
 #### Download one already finetuned
 
 ##### onedrive
-* (Onedrive link)[https://uoe-my.sharepoint.com/:f:/r/personal/s2259199_ed_ac_uk/Documents/mlp%20project/finetuned%20models?csf=1&web=1&e=UH2PXg]
+* [Onedrive link](https://uoe-my.sharepoint.com/:f:/r/personal/s2259199_ed_ac_uk/Documents/mlp%20project/finetuned%20models?csf=1&web=1&e=UH2PXg)
 
 ##### GCloud bucket (faster but costs $$)
 * pyscenedetect
