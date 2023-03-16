@@ -79,7 +79,27 @@ python command_builder/training_command.py -d data/train_val/transnet_frames/ -c
 python command_builder/training_command.py -d data/train_val/pyscenedetect_frames/ -c data/train_val/train_val_videodatainfo.json
 ```
 
-### 4.  Finetune Model
+### 4.  Finetune Model or Download Already Finetuned Models
+
+#### Download one already finetuned
+
+* pyscenedetect
+  - epochs 0-9
+    * https://storage.googleapis.com/mlpgit/results/pyscene_models.zip
+    * https://storage.googleapis.com/mlpgit/results/pyscene_losses.zip
+  - epochs 10-19
+    * https://storage.googleapis.com/mlpgit/results/pyscene_models2.zip
+    * https://storage.googleapis.com/mlpgit/results/pyscene_losses2.zip
+
+* random frames
+  - (pending)
+  - (pending)
+
+* transnet
+  - (pending)
+  - (pending)
+
+#### finetune your own
 Do this for *ONE* selected sampling method using the following.
 
 Alternatively you can call `./runner.sh` which should have everything you need,
@@ -97,19 +117,6 @@ python -m generativeimage2text.finetune -p '{
     "validation_annotations_json": "data/train_val/train_val_videodatainfo.json" #path to annotations file
 }
 ``` 
-
-### 4.5 Where to find already fine-tuned models
-
-* pyscenedetect
-  - https://storage.googleapis.com/mlpgit/results/pyscene_models.zip
-  - https://storage.googleapis.com/mlpgit/results/pyscene_losses.zip
-* random frames
-  - (pending)
-  - (pending)
-* transnet
-  - (pending)
-  - (pending)
-
 ### 5.  Run Inference
 on test set:
 
@@ -123,15 +130,28 @@ on multiple models
 python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference_dir', 'videos_csv': '', 'annotations_json_path': '', 'model_dir':'./model_transnet', 'model_name':'GIT_BASE'}"
 ```
 
+## Resources Created:
+
+* [merged frames thumbnails for sampling comparison](https://uoe-my.sharepoint.com/:f:/r/personal/s2259199_ed_ac_uk/Documents/mlp%20project/frame_comparisons?csf=1&web=1&e=nOfCVJ)
+
+* models (see section #4)
+
 ## FAQ
 
-- errors about cv2, pandas, numpy, etc.\
-  make sure you've installed the second requirements file as described above
+- Where can I find a A100 to finetune on?
+  * try the netherlands region OR salt lake city US
 
-- errors about model.py when running the fine tuning script\
-  make sure you've downloaded vatex as described above in the root dir of the project
+- errors about cv2, pandas, numpy, etc.
+  * make sure you've installed the second requirements file as described above
 
-----
+- errors about model.py when running the fine tuning script
+  * make sure you've downloaded vatex as described above in the root dir of the project
+
+-----
+# below this point is the original readme
+
+-----
+
 # Introduction
 This repo presents some example codes to reproduce some results in
 [GIT: A Generative Image-to-text Transformer for Vision and Language](https://arxiv.org/abs/2205.14100).
