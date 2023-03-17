@@ -224,7 +224,7 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
                 video_file_name = op.split(video_file[0])[-1].split('_')[0]
 
                 logging.info('progress: {}/{} video_id: {} output: {}'.format(
-                    i, len(video_files), video_file_name, cap)
+                    i+1, len(video_files), video_file_name, cap)
                 )
 
 
