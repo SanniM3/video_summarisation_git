@@ -276,7 +276,7 @@ def multi_video_inference_dir(videos_csv, annotations_json_path, model_dir, mode
         # model
         model = get_git_model(tokenizer, param)
         # pretrained = f'output/{model_name}/snapshot/model.pt'
-        pretrained = model_path
+        pretrained = os.path.join(model_dir, model_path)
         epoch_number = re.search(r'(epoch\d+)',model_path)
         if epoch_number is None: #inference from base model
             checkpoint = torch_load(pretrained)['model']
