@@ -10,6 +10,11 @@ class EvalCap:
     def __init__(self, captions_json, results_json):
         self.captions_dict = self.make_captions_dict(captions_json)
         self.results_dict = self.make_captions_dict(results_json)
+        
+        for k in list(self.captions_dict.keys()):
+            if k not in self.results_dict:
+                del self.captions_dict[k]
+
         self.evalImgs = []
         self.eval = {}
         self.imgToEval = {}
