@@ -147,7 +147,7 @@ def get_image_transform(param):
     transforms = Compose(trans)
     return transforms
 
-def multi_video_inference(videos_csv, annotations_json_path, model_path, model_name, prefixes=None):
+def multi_video_inference(videos_csv, annotations_json_path, model_path, model_name, predictions_file=None, prefixes=None):
     
     """
     annotations_json_path: path to json containing original video annotataions
@@ -179,53 +179,55 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
         epoch_number = epoch_number.group()
         model.load_state_dict(torch.load(pretrained))
 
-    predictions_file = "predictions_{}.json".format(str(epoch_number))
+    
     metrics_file = "metrics_{}.csv".format(str(epoch_number))
     
     
     model.cuda()
     model.eval()
 
-    vid_to_caption = {"videos": [], "sentences": []}
-    for video_file, prefix in zip(video_files, prefixes):
-        img = [load_image_by_pil(i) for i in video_file]
+    if predictions_file is None:
+        vid_to_caption = {"videos": [], "sentences": []}
+        predictions_file = "predictions_{}.json".format(str(epoch_number))
+        for video_file, prefix in zip(video_files, prefixes):
+            img = [load_image_by_pil(i) for i in video_file]
 
-        transforms = get_image_transform(param)
-        img = [transforms(i) for i in img]
+            transforms = get_image_transform(param)
+            img = [transforms(i) for i in img]
 
+            
+            img = [i.unsqueeze(0).cuda() for i in img]
+
+            # prefix
+            max_text_len = 40
+            prefix_encoding = tokenizer(prefix,
+                                        padding='do_not_pad',
+                                        truncation=True,
+                                        add_special_tokens=False,
+                                        max_length=max_text_len)
+            payload = prefix_encoding['input_ids']
+            if len(payload) > max_text_len - 2:
+                payload = payload[-(max_text_len - 2):]
+            input_ids = [tokenizer.cls_token_id] + payload
+
+            with torch.no_grad():
+                result = model({
+                    'image': img,
+                    'prefix': torch.tensor(input_ids).unsqueeze(0).cuda(),
+                })
+            cap = tokenizer.decode(result['predictions'][0].tolist(), skip_special_tokens=True)
+            logging.info('output: {}'.format(cap))
+            
+            video_file_name = op.split(video_file[0])[-1].split('_')[0]
+            
+            vid_to_caption["videos"].append({'video_id': video_file_name})
+            vid_to_caption["sentences"].append({'video_id': video_file_name,
+                                                'caption': cap})
         
-        img = [i.unsqueeze(0).cuda() for i in img]
-
-        # prefix
-        max_text_len = 40
-        prefix_encoding = tokenizer(prefix,
-                                    padding='do_not_pad',
-                                    truncation=True,
-                                    add_special_tokens=False,
-                                    max_length=max_text_len)
-        payload = prefix_encoding['input_ids']
-        if len(payload) > max_text_len - 2:
-            payload = payload[-(max_text_len - 2):]
-        input_ids = [tokenizer.cls_token_id] + payload
-
-        with torch.no_grad():
-            result = model({
-                'image': img,
-                'prefix': torch.tensor(input_ids).unsqueeze(0).cuda(),
-            })
-        cap = tokenizer.decode(result['predictions'][0].tolist(), skip_special_tokens=True)
-        logging.info('output: {}'.format(cap))
+        # write dictionary to json
         
-        video_file_name = op.split(video_file[0])[-1].split('_')[0]
-        
-        vid_to_caption["videos"].append({'video_id': video_file_name})
-        vid_to_caption["sentences"].append({'video_id': video_file_name,
-                                            'caption': cap})
-    
-    # write dictionary to json
-    
-    with open(os.path.join(os.getcwd(),predictions_file), "w") as f:
-        json.dump(vid_to_caption, f)
+        with open(os.path.join(os.getcwd(),predictions_file), "w") as f:
+            json.dump(vid_to_caption, f)
 
     # evaluate metrics
     metrics_obj = EvalCap(annotations_json_path,

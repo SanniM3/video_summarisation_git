@@ -125,7 +125,7 @@ python -m generativeimage2text.finetune -p '{
 on test set:
 
 ```
-python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference', 'videos_csv': '', 'annotations_json_path': '', 'model_path':'./msrvtt_model_epoch1.pt', 'model_name':'GIT_BASE'}"
+python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference', 'videos_csv': '', 'annotations_json_path': '', 'model_path':'./msrvtt_model_epoch1.pt', 'model_name':'GIT_BASE', 'predictions_file':None}"
 ```
 
 on multiple models
