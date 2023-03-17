@@ -192,7 +192,7 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
         predictions_file = "predictions_{}.json".format(str(epoch_number))
         prediction_csv_name = f"predictions_{str(epoch_number)}.csv"
         with open(prediction_csv_name, 'w') as prediction_csv:
-            csv_writer = DictWriter(prediction_csv, fieldnames=['video_id', 'caption'])
+            csv_writer = DictWriter(prediction_csv, fieldnames=['video_id', 'caption'],dialect='excel')
             csv_writer.writeheader()
             for i, (video_file, prefix) in enumerate(zip(video_files, prefixes)):
                 img = [load_image_by_pil(i) for i in video_file]
