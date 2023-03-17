@@ -39,6 +39,7 @@ from .model import get_git_model
 
 from .metrics.eval import EvalCap
 import os
+from csv import DictWriter
 
 
 class MinMaxResizeForTest(object):
@@ -189,40 +190,49 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
     if predictions_file is None:
         vid_to_caption = {"videos": [], "sentences": []}
         predictions_file = "predictions_{}.json".format(str(epoch_number))
-        for video_file, prefix in zip(video_files, prefixes):
-            img = [load_image_by_pil(i) for i in video_file]
+        prediction_csv_name = f"predictions_{str(epoch_number)}.csv"
+        with open(prediction_csv_name, 'w') as prediction_csv:
+            csv_writer = DictWriter(prediction_csv, fieldnames=['video_id', 'caption'],dialect='excel')
+            csv_writer.writeheader()
+            for i, (video_file, prefix) in enumerate(zip(video_files, prefixes)):
+                img = [load_image_by_pil(i) for i in video_file]
 
-            transforms = get_image_transform(param)
-            img = [transforms(i) for i in img]
+                transforms = get_image_transform(param)
+                img = [transforms(i) for i in img]
 
-            
-            img = [i.unsqueeze(0).cuda() for i in img]
+                
+                img = [i.unsqueeze(0).cuda() for i in img]
 
-            # prefix
-            max_text_len = 40
-            prefix_encoding = tokenizer(prefix,
-                                        padding='do_not_pad',
-                                        truncation=True,
-                                        add_special_tokens=False,
-                                        max_length=max_text_len)
-            payload = prefix_encoding['input_ids']
-            if len(payload) > max_text_len - 2:
-                payload = payload[-(max_text_len - 2):]
-            input_ids = [tokenizer.cls_token_id] + payload
+                # prefix
+                max_text_len = 40
+                prefix_encoding = tokenizer(prefix,
+                                            padding='do_not_pad',
+                                            truncation=True,
+                                            add_special_tokens=False,
+                                            max_length=max_text_len)
+                payload = prefix_encoding['input_ids']
+                if len(payload) > max_text_len - 2:
+                    payload = payload[-(max_text_len - 2):]
+                input_ids = [tokenizer.cls_token_id] + payload
 
-            with torch.no_grad():
-                result = model({
-                    'image': img,
-                    'prefix': torch.tensor(input_ids).unsqueeze(0).cuda(),
-                })
-            cap = tokenizer.decode(result['predictions'][0].tolist(), skip_special_tokens=True)
-            logging.info('output: {}'.format(cap))
-            
-            video_file_name = op.split(video_file[0])[-1].split('_')[0]
-            
-            vid_to_caption["videos"].append({'video_id': video_file_name})
-            vid_to_caption["sentences"].append({'video_id': video_file_name,
-                                                'caption': cap})
+                with torch.no_grad():
+                    result = model({
+                        'image': img,
+                        'prefix': torch.tensor(input_ids).unsqueeze(0).cuda(),
+                    })
+                cap = tokenizer.decode(result['predictions'][0].tolist(), skip_special_tokens=True)
+                video_file_name = op.split(video_file[0])[-1].split('_')[0]
+
+                logging.info('progress: {}/{} video_id: {} output: {}'.format(
+                    i+1, len(video_files), video_file_name, cap)
+                )
+
+
+                
+                vid_to_caption["videos"].append({'video_id': video_file_name})
+                vid_to_caption["sentences"].append({'video_id': video_file_name,
+                                                    'caption': cap})
+                csv_writer.writerow({'video_id': video_file_name, 'caption': cap})
         
         # write dictionary to json
         
