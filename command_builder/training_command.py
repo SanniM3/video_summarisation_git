@@ -208,5 +208,5 @@ if 'train' in csv_files.keys() and 'validate' in csv_files.keys():
     with open('runner.sh', 'w') as f:
         f.write(command)
 else:
-    print("CSV created, but training command not created, because dataset was not not training split")
+    print("CSV created, but training command not created, because dataset was not training split")
     print(f"splits found were: {splits}")
