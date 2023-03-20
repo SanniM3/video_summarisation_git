@@ -107,7 +107,8 @@ sentences = sentences.drop("sen_id", axis=1)
 if not args.all_captions:
     random.seed(RAND_SEED)
     sentences = sentences.groupby('video_id').agg({'caption':list})
-    sentences['caption'] = sentences.apply({'caption':random.choice})
+    sentences['caption'] = sentences['caption'].apply(random.sample, args=(5,)) # pick 5 captions per video
+    sentences = sentences.explode('caption')
 
 sentences = sentences.sort_values("video_id")
 
