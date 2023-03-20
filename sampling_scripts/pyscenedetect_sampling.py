@@ -61,15 +61,12 @@ for video in tqdm(os.listdir(args.data_dir)):
             scenes = detect(os.path.join(args.data_dir, video), AdaptiveDetector())
             if len(scenes) <= 1:
                 scenes = detect(os.path.join(args.data_dir, video), ContentDetector())
-            
-            if len(scenes) <= 1:
                 print('File {} is now randomly sampled, as only one scene found'.format(video_name))
                 stats['num_scenes'].append(1)
                 frame_numbers = sorted(random.sample(range(0, total_frames), 6))
 
             else:
                 scene_list = []
-
                 for i, scene in enumerate(scenes):
                     scene_list.append([scene[0].get_frames()+1, scene[1].get_frames()])
 
