@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import tensorflow as tf
+import ..frame_picker
 
 
 class TransNetV2:
@@ -137,14 +138,9 @@ class TransNetV2:
                 t_prev = t
             if t == 0:
                 scenes.append([start, i])
-            # sample 1 frame randomly from each scene until 6 frames are found
-            n = 0
-            while n < N:
-                for s in scenes:
-                    frame_numbers[n] = np.random.randint(s[0], s[1]+1)
-                    n+=1 
-                    if n == N:
-                        break
+
+            # sample N frames 
+            frame_numbers = frame_picker.pick_n_frames(scenes, N)
             num_scenes = len(scenes)
 
         return frame_numbers, num_scenes

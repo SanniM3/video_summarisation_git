@@ -8,6 +8,7 @@ import cv2
 import numpy as  np
 import pandas as pd
 import random
+import frame_picker
 
 args = argparse.ArgumentParser()
 args.add_argument("-data_dir", type=str,
@@ -74,16 +75,7 @@ for video in tqdm(os.listdir(args.data_dir)):
     
                 stats['num_scenes'].append(len(scene_list))
                 
-                frame_numbers = np.zeros(6)
-                
-                # sample 1 frame randomly from each scene until 6 frames are found
-                n = 0
-                while n < 6:
-                    for s in scenes:
-                        frame_numbers[n] = np.random.randint(s[0], s[1]+1)
-                        n+=1 
-                        if n == 6:
-                            break
+                frame_numbers = frame_picker.pick_n_frames(scene_list)
 
             # save frames
             n = 0
