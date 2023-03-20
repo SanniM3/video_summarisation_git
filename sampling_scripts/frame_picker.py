@@ -20,7 +20,16 @@ def _select_n_scenes(scenes, n):
         return scenes + random.choices(scenes, k=diff)
 
 def _select_frames_from_scenes(scenes):
-    return sorted([np.random.randint(start, end+1) for start, end in scenes])
+    # print(scenes)
+    ret = []
+    for start, end in scenes:
+        #print(f"selecting between {start} and {end} (exclusive)")
+        if start == end:
+            frame = start # work around b/c randint hates start == end
+        else:
+            frame = np.random.randint(start, end)
+        ret.append(frame)
+    return sorted(ret)
 
 def pick_n_frames(scenes, n):
     scene_subset = _select_n_scenes(scenes, n)
