@@ -7,7 +7,7 @@ import cv2
 import numpy as  np
 import pandas as pd
 import json
-
+import frame_picker
 
 par = ArgumentParser()
 par.add_argument("-model_dir", type=str, default="/Users/ilakyaprabhakar/Documents/Edin MSc/MLP/video_summarisation_git/sampling_scripts/TransNetV2/transnetv2-weights",

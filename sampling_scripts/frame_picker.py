@@ -1,6 +1,9 @@
 import random
 import numpy as np
 
+random.seed(42)
+np.random.seed(42)
+
 def _select_n_scenes(scenes, n):
     """given a list of scenes, randomly pick n scenes from it.
     

@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import tensorflow as tf
-import ..frame_picker
+import frame_picker
 
 
 class TransNetV2:

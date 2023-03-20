@@ -66,16 +66,16 @@ for video in tqdm(os.listdir(args.data_dir)):
                 print('File {} is now randomly sampled, as only one scene found'.format(video_name))
                 stats['num_scenes'].append(1)
                 frame_numbers = sorted(random.sample(range(0, total_frames), 6))
-    
+
             else:
                 scene_list = []
-    
+
                 for i, scene in enumerate(scenes):
                     scene_list.append([scene[0].get_frames()+1, scene[1].get_frames()])
-    
+
                 stats['num_scenes'].append(len(scene_list))
                 
-                frame_numbers = frame_picker.pick_n_frames(scene_list)
+                frame_numbers = frame_picker.pick_n_frames(scene_list, 6)
 
             # save frames
             n = 0
@@ -87,8 +87,9 @@ for video in tqdm(os.listdir(args.data_dir)):
                 if success:
                     cv2.imwrite(os.path.join(video_file, video_name+'_frame{}.jpg'.format(n)), image)
                     n+=1
-        except:
+        except Exception as e:
             print('File {} skipped, potentially corrupted.'.format(video_name))
+            print(f"details:\n\t{e}")
             continue
                 
 df = pd.DataFrame(stats)
