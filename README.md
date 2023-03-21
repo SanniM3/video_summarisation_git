@@ -49,11 +49,13 @@ video_summarisation_git/data/
 Download and unzip them in `/data/train_val` or `/data/train` as appropriate.
 
 - Training (2023-03-20)
-  * https://storage.googleapis.com/mlpgit/data2023-03-20/train_val/train_pyscenedetect_frames.zip
-  * https://storage.googleapis.com/mlpgit/data2023-03-20/train_val/transnet_frames_2023-03-20_22-29.zip
+  * pyscene https://storage.googleapis.com/mlpgit/data2023-03-20/train_val/train_pyscenedetect_frames.zip
+  * transnet https://storage.googleapis.com/mlpgit/data2023-03-20/train_val/transnet_frames_2023-03-20_22-29.zip
+  * random https://storage.googleapis.com/mlpgit/data2023-03-20/train_random_frames_3-31.zip
 - Test (2023-03-20)
-  * https://storage.googleapis.com/mlpgit/data2023-03-20/test_pyscenedetect_frames.zip
-  * https://storage.googleapis.com/mlpgit/data2023-03-20/test_transnet_frames.zip
+  * pyscene https://storage.googleapis.com/mlpgit/data2023-03-20/test_pyscenedetect_frames.zip
+  * transnet https://storage.googleapis.com/mlpgit/data2023-03-20/test_transnet_frames.zip
+  * random https://storage.googleapis.com/mlpgit/data2023-03-20/test_random_frames_3-31.zip
 - out of order frames (out of date)
   * ~https://storage.googleapis.com/mlpgit/data/train_val/train_val.zip~
   * ~https://storage.googleapis.com/mlpgit/data/test/test_frames.zip~
