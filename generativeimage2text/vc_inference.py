@@ -245,9 +245,11 @@ def multi_video_inference(videos_csv, annotations_json_path, model_path, model_n
     metrics_obj.evaluate()
     
     # save metrics
-    metrics = pd.DataFrame(data={'Metric Name':[], 'Metric Value':[]})
+    metrics = pd.DataFrame(columns=['Metric Name','Metric Value'])
+    r = 1
     for metric, score in metrics_obj.eval.items():
-        metrics.append({'Metric Name':metric, 'Metric Value':score}, ignore_index=True)
+        metrics.loc[r] = [metric] + [score]
+        r += 1
     
     metrics.to_csv(metrics_file, index=False)
 
