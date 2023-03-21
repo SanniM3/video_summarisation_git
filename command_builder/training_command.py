@@ -93,7 +93,7 @@ if args.verbose:
 if args.debug:
     logging.getLogger().setLevel(logging.DEBUG)
 
-#######################################
+########################################
 ##  get annotations
 ########################################
 
@@ -107,7 +107,8 @@ sentences = sentences.drop("sen_id", axis=1)
 if not args.all_captions:
     random.seed(RAND_SEED)
     sentences = sentences.groupby('video_id').agg({'caption':list})
-    sentences['caption'] = sentences.apply({'caption':random.choice})
+    sentences['caption'] = sentences['caption'].apply(random.sample, args=(5,)) # pick 5 captions per video
+    sentences = sentences.explode('caption')
 
 sentences = sentences.sort_values("video_id")
 
@@ -117,14 +118,18 @@ video_meta_data.drop(['url'],axis=1)
 video_meta_data['length'] = video_meta_data['end time'] - video_meta_data['start time']
 video_meta_data['category'] = video_meta_data['category'].astype(int)
 
+########################################
+##  get categories
+########################################
+
 category_table = pd.read_table(
     pathlib.Path(os.path.join(os.getcwd(),DATA_DIR)).parent / 'category.txt',
     delimiter='\t',
-    header=0,
+    header=None,
     names=['category_name','category']
 )
 
-#######################################
+########################################
 ##  get frames
 ########################################
 
@@ -169,6 +174,7 @@ for split in splits:
     csv_files[split] = str(csv_out)
     cur_split.to_csv(csv_out)
     logging.debug(f"  creating '{csv_out}': {'SUCCESS' if os.path.isfile(csv_out) else 'FAIL'}")
+    print(f"csv for '{split}' created with {cur_split.shape[0]} rows. (Please check if this is expected)")
 
 
     # print statistical info for debugging, etc.
@@ -184,20 +190,24 @@ for split in splits:
     )
     logging.info(f"\nLength statistics by video category:\n{length_by_category}")
 
-base_command = "python -m generativeimage2text.finetune -p"
-params = json.dumps({
-    'type': 'train',
-    'model_name': args.model,
-    'batch_size': args.batch_size,
-    'epochs': args.epochs,
-    "train_csv": csv_files['train'],
-    'model_path': 'model.pt', 
-    "validation_csv": csv_files['validate'],
-    "validation_annotations_json": str(args.captions_file)
-})
+if 'train' in csv_files.keys() and 'validate' in csv_files.keys():
+    base_command = "python -m generativeimage2text.finetune -p"
+    params = json.dumps({
+        'type': 'train',
+        'model_name': args.model,
+        'batch_size': args.batch_size,
+        'epochs': args.epochs,
+        "train_csv": csv_files['train'],
+        'model_path': 'model.pt', 
+        "validation_csv": csv_files['validate'],
+        "validation_annotations_json": str(args.captions_file)
+    })
 
-command = f"{base_command} '{params}'\n"
+    command = f"{base_command} '{params}'\n"
 
-# write command to .sh file
-with open('runner.sh', 'w') as f:
-    f.write(command)
+    # write command to .sh file
+    with open('runner.sh', 'w') as f:
+        f.write(command)
+else:
+    print("CSV created, but training command not created, because dataset was not training split")
+    print(f"splits found were: {splits}")
