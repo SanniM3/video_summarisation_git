@@ -36,16 +36,6 @@ args.add_argument(
 )
 
 args.add_argument(
-    "-a", "--all-captions",
-    action="store_true",
-    help="""create fine tune command for ALL captions.
-            If this flag is not set, a single random caption
-            will be selected for each video as suggested by
-            "https://huggingface.co/docs/transformers/main/en/tasks/image_captioning".
-            """
-)
-
-args.add_argument(
     "-m", "--model",
     default="GIT_BASE",
     help="""The name of the model to fine tune.
@@ -85,6 +75,16 @@ args.add_argument(
     help="only output a certain category of video. Category should be an integer"
 )
 
+args.add_argument(
+    "-n", "--num_examples",
+    type=int,
+    default=5,
+    help=textwrap.dedent(
+        """Each video has several sentences. This arg controls how many sentences
+        per video to include in the csv. Default is 5. Set this to zero to get ALL sentences"""
+    )
+)
+
 args = args.parse_args()
 
 # show/hide debugging
@@ -104,10 +104,10 @@ sentences = pd.DataFrame(json_data['sentences'])
 sentences = sentences.drop("sen_id", axis=1)
 
 # select random captions based on command line args
-if not args.all_captions:
+if args.num_examples:
     random.seed(RAND_SEED)
     sentences = sentences.groupby('video_id').agg({'caption':list})
-    sentences['caption'] = sentences['caption'].apply(random.sample, args=(5,)) # pick 5 captions per video
+    sentences['caption'] = sentences['caption'].apply(random.sample, args=(args.num_examples,)) # pick N captions per video
     sentences = sentences.explode('caption')
 
 sentences = sentences.sort_values("video_id")
