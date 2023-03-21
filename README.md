@@ -97,20 +97,20 @@ python command_builder/training_command.py -d data/train_val/pyscenedetect_frame
 
 ##### GCloud bucket (faster but costs $$)
 * pyscenedetect
-  - epochs 0-9
-    * https://storage.googleapis.com/mlpgit/results/pyscene_models.zip
-    * https://storage.googleapis.com/mlpgit/results/pyscene_losses.zip
-  - epochs 10-19
-    * https://storage.googleapis.com/mlpgit/results/pyscene_models2.zip
-    * https://storage.googleapis.com/mlpgit/results/pyscene_losses2.zip
+  - ~epochs 0-9~
+    * ~https://storage.googleapis.com/mlpgit/results/pyscene_models.zip~
+    * ~https://storage.googleapis.com/mlpgit/results/pyscene_losses.zip~
+  - ~epochs 10-19~
+    * ~https://storage.googleapis.com/mlpgit/results/pyscene_models2.zip~
+    * ~https://storage.googleapis.com/mlpgit/results/pyscene_losses2.zip~
 
 * random frames
   - (pending)
   - (pending)
 
 * transnet
-  - (pending)
-  - (pending)
+  - https://storage.googleapis.com/mlpgit/results2/models/transnet_models_03-21.zip
+  - https://storage.googleapis.com/mlpgit/results2/models/transnet_loss_03-21.zip
 
 #### finetune your own
 Do this for *ONE* selected sampling method using the following.
@@ -142,6 +142,12 @@ on multiple models
 ```
 python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference_dir', 'videos_csv': '', 'annotations_json_path': '', 'model_dir':'./model_transnet', 'model_name':'GIT_BASE'}"
 ```
+
+## Inference Results
+* Transnet
+  - https://storage.googleapis.com/mlpgit/results2/transnet_inference_results_3_21.zip
+* Random
+* Pyscene
 
 ## Resources Created:
 
