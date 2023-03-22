@@ -105,8 +105,8 @@ python command_builder/training_command.py -d data/train_val/pyscenedetect_frame
     * ~https://storage.googleapis.com/mlpgit/results/pyscene_losses2.zip~
 
 * random frames
-  - (pending)
-  - (pending)
+  - https://storage.googleapis.com/mlpgit/results2/models/random_models_03-21.zip
+  - https://storage.googleapis.com/mlpgit/results2/models/random_loss_03-21.zip
 
 * transnet
   - https://storage.googleapis.com/mlpgit/results2/models/transnet_models_03-21.zip
