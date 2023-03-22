@@ -97,6 +97,7 @@ python command_builder/training_command.py -d data/train_val/pyscenedetect_frame
 
 ##### GCloud bucket (faster but costs $$)
 * pyscenedetect
+  - (pending)
   - ~epochs 0-9~
     * ~https://storage.googleapis.com/mlpgit/results/pyscene_models.zip~
     * ~https://storage.googleapis.com/mlpgit/results/pyscene_losses.zip~
@@ -144,10 +145,15 @@ python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference_
 ```
 
 ## Inference Results
-* Transnet
-  - https://storage.googleapis.com/mlpgit/results2/transnet_inference_results_3_21.zip
-* Random
-* Pyscene
+* one drive
+  *[Onedrive link](https://uoe-my.sharepoint.com/:f:/r/personal/s2259199_ed_ac_uk/Documents/mlp%20project/finetuned%20models?csf=1&web=1&e=UH2PXg)
+* gcp bucket
+  * Transnet
+    - https://storage.googleapis.com/mlpgit/results2/transnet_inference_results_3_21.zip
+  * Random
+    - https://storage.googleapis.com/mlpgit/results2/random_inference_results_3_22.zip
+  * Pyscene
+    - (pending)
 
 ## Resources Created:
 
