@@ -154,7 +154,7 @@ python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference_
   * Random
     - https://storage.googleapis.com/mlpgit/results2/random_inference_results_3_22.zip
   * Pyscene
-    - (pending)
+    - https://storage.googleapis.com/mlpgit/results2/pyscene_inference_results_3_22.zip
 
 ## Resources Created:
 
