@@ -97,7 +97,8 @@ python command_builder/training_command.py -d data/train_val/pyscenedetect_frame
 
 ##### GCloud bucket (faster but costs $$)
 * pyscenedetect
-  - (pending)
+  - https://storage.googleapis.com/mlpgit/results2/models/pyscene_models_03-22.zip
+  - https://storage.googleapis.com/mlpgit/results2/models/pyscene_loss_03-22.zip
   - ~epochs 0-9~
     * ~https://storage.googleapis.com/mlpgit/results/pyscene_models.zip~
     * ~https://storage.googleapis.com/mlpgit/results/pyscene_losses.zip~
