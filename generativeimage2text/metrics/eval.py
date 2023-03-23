@@ -64,6 +64,9 @@ class EvalCap:
     def evaluate(self):
         gts = self.captions_dict
         res = self.results_dict
+        
+        print(gts.keys())
+        print(res.keys())
 
         # =================================================
         # Set up scorers
