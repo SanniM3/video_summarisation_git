@@ -11,6 +11,8 @@ class EvalCap:
         self.captions_dict = self.make_captions_dict(captions_json)
         self.results_dict = self.make_captions_dict(results_json)
         
+        print(self.results_dict.keys())
+        
         for k in list(self.captions_dict.keys()):
             if k not in self.results_dict:
                 del self.captions_dict[k]
