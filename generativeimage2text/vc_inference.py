@@ -2,6 +2,7 @@ from .common import Config
 import json
 import re
 import pandas as pd
+import pathlib
 from ast import literal_eval
 import os.path as op
 from .common import qd_tqdm as tqdm
@@ -259,7 +260,8 @@ def multi_video_inference_dir(videos_csv, annotations_json_path, model_dir, mode
     annotations_json_path: path to json containing original video annotataions
     """
     #create directory fore prediction and metrics in model_dir
-    os.mkdir(os.path.join(model_dir, 'predictions'))                 
+    pathlib.Path(os.path.join(model_dir, 'predictions')).mkdir(parents=True, exist_ok=True)
+    #os.mkdir(os.path.join(model_dir, 'predictions'))                 
     
     video_files_df = pd.read_csv(videos_csv)
     video_files = list(video_files_df['image_files'])
