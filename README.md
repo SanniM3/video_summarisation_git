@@ -155,6 +155,9 @@ python -m generativeimage2text.vc_inference -p "{'type': 'multi_video_inference_
     - https://storage.googleapis.com/mlpgit/results2/random_inference_results_3_22.zip
   * Pyscene
     - https://storage.googleapis.com/mlpgit/results2/pyscene_inference_results_3_22.zip
+* ***Viewable HTML Results***
+  * [onedrive link](https://uoe-my.sharepoint.com/:u:/r/personal/s2259199_ed_ac_uk/Documents/mlp%20project/frame_comparisons/presenter.zip?csf=1&web=1&e=2VBCuz)
+  * [gpc bucket](https://storage.googleapis.com/mlpgit/presentation/presenter.zip)
 
 ## Resources Created:
 
