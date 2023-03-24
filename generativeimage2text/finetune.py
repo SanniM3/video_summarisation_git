@@ -261,7 +261,7 @@ def train(train_csv, validation_csv, validation_annotations_json, model_name, mo
     print('model moved to cuda')
 
     #use adam optimiser
-    optimizer = torch.optim.Adam(model.parameters(), betas=(0.9, 0.999), lr=0.00001)
+    optimizer = torch.optim.Adam(model.parameters(), betas=(0.9, 0.999), lr=0.0000025)
     train_losses = [] #keep track of validation losses through all epochs
     val_losses = [] #keep track of validation losses through all epochs
     
