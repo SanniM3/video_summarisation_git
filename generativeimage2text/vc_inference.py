@@ -262,13 +262,29 @@ def multi_video_inference_dir(videos_csv, annotations_json_path, model_dir, mode
     #create directory fore prediction and metrics in model_dir
     pathlib.Path(os.path.join(model_dir, 'predictions')).mkdir(parents=True, exist_ok=True)
     #os.mkdir(os.path.join(model_dir, 'predictions'))                 
-    
+
     video_files_df = pd.read_csv(videos_csv)
     video_files = list(video_files_df['image_files'])
     video_files = [literal_eval(i) for i in video_files]
     
+    ignore = ['better_msrvtt_model_epoch0.pt',
+              'better_msrvtt_model_epoch1.pt',
+              'regular_msrvtt_model_epoch10.pt',
+              'regular_msrvtt_model_epoch11.pt', 
+              'regular_msrvtt_model_epoch12.pt',
+              'regular_msrvtt_model_epoch13.pt',
+              'regular_msrvtt_model_epoch14.pt',
+              'regular_msrvtt_model_epoch15.pt',
+              'regular_msrvtt_model_epoch17.pt',
+              'regular_msrvtt_model_epoch18.pt', 
+              'better_msrvtt_model_epoch9.pt',
+              'predictions']
+
     for model_path in os.listdir(model_dir):
-        
+
+        if model_path in ignore:
+            continue
+
         if prefixes is None:
             prefixes = ['']*len(video_files)
         param = {}
