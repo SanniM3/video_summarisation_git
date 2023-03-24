@@ -275,9 +275,11 @@ def multi_video_inference_dir(videos_csv, annotations_json_path, model_dir, mode
               'regular_msrvtt_model_epoch13.pt',
               'regular_msrvtt_model_epoch14.pt',
               'regular_msrvtt_model_epoch15.pt',
+              'regular_msrvtt_model_epoch16.pt',
               'regular_msrvtt_model_epoch17.pt',
               'regular_msrvtt_model_epoch18.pt', 
               'better_msrvtt_model_epoch9.pt',
+              'better_msrvtt_model_epoch19.pt',
               'predictions']
 
     for model_path in os.listdir(model_dir):
